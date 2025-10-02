@@ -141,17 +141,28 @@ namespace TRAFFIK_API.Controllers
         /// Retrieves available services for a specific vehicle model.
         /// </summary>
         /// <param name="carModelId">The ID of the car model to check services for.</param>
+        /// 
+        //GET /api/ServiceCatalog/AvailableForVehicle/{carModelId}
         [HttpGet("AvailableForVehicle/{carModelId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<IEnumerable<ServiceCatalog>>> GetAvailableServices(int carModelId)
         {
-            var carModel = await _context.CarModels.FindAsync(carModelId);
+
+          var carModel = await _context.CarModels
+        .Include(cm => cm.CarModelServices)
+        .ThenInclude(cms => cms.ServiceCatalog)
+        .FirstOrDefaultAsync(cm => cm.Id == carModelId);
+
             if (carModel == null)
                 return NotFound("Vehicle not found");
 
-            // For now, return all services
-            return await _context.ServiceCatalogs.ToListAsync();
+            var compatibleServices = carModel.CarModelServices
+                .Select(cms => cms.ServiceCatalog)
+                .ToList();
+
+            return Ok(compatibleServices);
+
         }
     }
 }

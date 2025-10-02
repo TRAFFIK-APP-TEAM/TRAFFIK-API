@@ -41,5 +41,8 @@
         /// The type or category of the notification.
         /// </summary>
         public string Type { get; set; }
+
+        public User User { get; set; }
+        public Booking Booking { get; set; }
     }
 }

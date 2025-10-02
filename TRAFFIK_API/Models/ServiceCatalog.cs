@@ -24,5 +24,10 @@
         /// The price of the service.
         /// </summary>
         public decimal Price { get; set; } // e.g 79.99
+
+        
+        public ICollection<Booking> Bookings { get; set; } = new List<Booking>();
+        public ICollection<CarModelService> CarModelServices { get; set; } = new List<CarModelService>();
+
     }
 }

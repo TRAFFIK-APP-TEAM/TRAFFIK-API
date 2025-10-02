@@ -51,5 +51,13 @@ namespace TRAFFIK_API.Models
         /// Indicates whether the user is currently active.
         /// </summary>
         public bool IsActive { get; set; }
+
+       
+        public ICollection<CarModel> Cars { get; set; } = new List<CarModel>();
+        public ICollection<Booking> Bookings { get; set; } = new List<Booking>();
+        public ICollection<Notifications> Notifications { get; set; } = new List<Notifications>();
+        public ICollection<Reward> Rewards { get; set; } = new List<Reward>();
+        public ICollection<Review> Reviews { get; set; } = new List<Review>();
+
     }
 }

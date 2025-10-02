@@ -32,5 +32,7 @@
         /// Indicates whether the reward has been redeemed.
         /// </summary>
         public bool Redeemed { get; set; }
+
+        public User User { get; set; }
     }
 }

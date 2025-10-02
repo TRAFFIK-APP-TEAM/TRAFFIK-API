@@ -36,5 +36,6 @@
         /// Indicates whether the payment was successfully completed.
         /// </summary>
         public bool PaymentStatus { get; set; }
+        public Booking Booking { get; set; }
     }
 }

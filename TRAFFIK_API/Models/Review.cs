@@ -34,5 +34,8 @@
         /// The date and time the review was created.
         /// </summary>
         public DateTime CreatedAt { get; set; }
+
+        public User User { get; set; }
+        public Booking Booking { get; set; }
     }
 }

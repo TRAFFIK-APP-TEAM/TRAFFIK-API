@@ -39,5 +39,11 @@
         /// The current status of the booking.
         /// </summary>
         public string Status { get; set; } // e.g., "Pending", "Completed", "Cancelled"
+
+ 
+        public ICollection<Payments> Payments { get; set; } = new List<Payments>();
+        public ICollection<Notifications> Notifications { get; set; } = new List<Notifications>();
+        public ICollection<Review> Reviews { get; set; } = new List<Review>();
+        public ICollection<BookingStages> BookingStages { get; set; } = new List<BookingStages>();
     }
 }

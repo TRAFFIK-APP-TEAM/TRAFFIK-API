@@ -24,5 +24,7 @@
         /// The timestamp when the stage was recorded.
         /// </summary>
         public DateTime TimeStamp { get; set; }
+
+
     }
 }
