@@ -16,8 +16,4 @@
         public DateTime CompletedAt { get; set; }
     }
 
-
-
-
-}
 }
