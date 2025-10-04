@@ -45,5 +45,6 @@
         public ICollection<Notifications> Notifications { get; set; } = new List<Notifications>();
         public ICollection<Review> Reviews { get; set; } = new List<Review>();
         public ICollection<BookingStages> BookingStages { get; set; } = new List<BookingStages>();
+
     }
 }

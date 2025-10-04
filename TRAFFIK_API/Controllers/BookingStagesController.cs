@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TRAFFIK_API.Data;
 using TRAFFIK_API.Models;
+using TRAFFIK_API.DTOs;
 
 namespace TRAFFIK_API.Controllers
 {
@@ -138,6 +139,33 @@ namespace TRAFFIK_API.Controllers
         private bool BookingStagesExists(int id)
         {
             return _context.BookingStages.Any(e => e.Id == id);
+        }
+
+        //POST /api/BookingStages/UpdateStage
+        [HttpPost("UpdateStage")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> UpdateStage([FromBody] BookingStageUpdateDto dto)
+        {
+            var booking = await _context.Bookings.FindAsync(dto.BookingId);
+            var user = await _context.Users.FindAsync(dto.UpdatedByUserId);
+
+            if (booking == null || user == null)
+                return BadRequest("Invalid booking or user ID.");
+
+            var stage = new BookingStages
+            {
+                BookingId = dto.BookingId,
+                StageName = dto.StageName,
+                Status = dto.Status,
+                TimeStamp = DateTime.UtcNow,
+                UpdatedByUserId = dto.UpdatedByUserId
+            };
+
+            _context.BookingStages.Add(stage);
+            await _context.SaveChangesAsync();
+
+            return Ok("Booking stage updated.");
         }
     }
 }

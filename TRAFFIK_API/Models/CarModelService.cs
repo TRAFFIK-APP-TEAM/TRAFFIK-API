@@ -9,7 +9,5 @@
         public int ServiceCatalogId { get; set; }
         public ServiceCatalog ServiceCatalog { get; set; }
 
-
-
     }
 }

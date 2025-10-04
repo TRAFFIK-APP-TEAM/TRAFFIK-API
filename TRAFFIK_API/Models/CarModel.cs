@@ -35,12 +35,12 @@
         /// </summary>
         public string PlateNumber { get; set; }
 
-        //Many Cars belong to One User
+        
         public User User { get; set; }
-
        
         public ICollection<Booking> Bookings { get; set; } = new List<Booking>();
         public ICollection<CarModelService> CarModelServices { get; set; } = new List<CarModelService>();
+        public ICollection<ServiceHistory> ServiceHistories { get; set; } = new List<ServiceHistory>();
 
 
     }
