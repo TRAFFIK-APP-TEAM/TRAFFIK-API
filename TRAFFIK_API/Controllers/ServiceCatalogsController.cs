@@ -150,7 +150,7 @@ namespace TRAFFIK_API.Controllers
         {
          var carModel = await _context.CarModels
         .Include(cm => cm.CarType)
-        .FirstOrDefaultAsync(cm => cm.Id == carModelId);
+        .FirstOrDefaultAsync(cm => cm.Id == carModelId); 
 
             if (carModel == null)
                 return NotFound("Vehicle not found");
