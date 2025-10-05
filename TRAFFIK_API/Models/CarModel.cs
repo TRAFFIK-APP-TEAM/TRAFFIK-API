@@ -34,14 +34,15 @@
         /// The license plate number of the vehicle.
         /// </summary>
         public string PlateNumber { get; set; }
+        public int CarTypeId { get; set; }
+        public CarType CarType { get; set; }
 
-        
         public User User { get; set; }
        
         public ICollection<Booking> Bookings { get; set; } = new List<Booking>();
         public ICollection<CarModelService> CarModelServices { get; set; } = new List<CarModelService>();
         public ICollection<ServiceHistory> ServiceHistories { get; set; } = new List<ServiceHistory>();
-
+        //public ICollection<ServiceCatalog>Services { get; set; } = new List<ServiceCatalog>();
 
     }
 }

@@ -28,6 +28,7 @@
         
         public ICollection<Booking> Bookings { get; set; } = new List<Booking>();
         public ICollection<CarModelService> CarModelServices { get; set; } = new List<CarModelService>();
+        public ICollection<CarTypeServices> CarTypeServices { get; set; } = new List<CarTypeServices>();
 
     }
 }

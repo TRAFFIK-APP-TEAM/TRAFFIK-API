@@ -21,6 +21,9 @@ namespace TRAFFIK_API.Data
         public DbSet<Review> Reviews { get; set; } = default!;
         public DbSet<Reward> Rewards { get; set; } = default!;
         public DbSet<ServiceHistory> ServiceHistories { get; set; } = default!;
+        public DbSet<CarType> CarTypes { get; set; }
+        public DbSet<CarTypeServices> CarTypeServices { get; set; }
+
 
         // Override OnModelCreating if you need to configure relationships, keys, etc.
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -38,6 +41,20 @@ namespace TRAFFIK_API.Data
                 .HasOne(bs => bs.UpdatedByUser)
                 .WithMany()
                 .HasForeignKey(bs => bs.UpdatedByUserId);
+
+
+            modelBuilder.Entity<CarTypeServices>()
+            .HasKey(cts => new { cts.CarTypeId, cts.ServiceCatalogId });
+            modelBuilder.Entity<CarTypeServices>()
+                .HasOne(cts => cts.CarType)
+                .WithMany(ct => ct.CarTypeServices)
+                .HasForeignKey(cts => cts.CarTypeId);
+
+            modelBuilder.Entity<CarTypeServices>()
+                .HasOne(cts => cts.ServiceCatalog)
+                .WithMany(sc => sc.CarTypeServices)
+                .HasForeignKey(cts => cts.ServiceCatalogId);
+
         }
     }
 }

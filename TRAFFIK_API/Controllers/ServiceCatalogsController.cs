@@ -136,32 +136,34 @@ namespace TRAFFIK_API.Controllers
         }
 
         // for now doesnt work, must add selection logic later
-        // GET: api/ServiceCatalog/AvailableForVehicle/{carModelId} 
+        // GET: api/ServiceCatalog/AvailableForVehicle/{carType} 
         /// <summary>
         /// Retrieves available services for a specific vehicle model.
         /// </summary>
         /// <param name="carModelId">The ID of the car model to check services for.</param>
         /// 
-        //GET /api/ServiceCatalog/AvailableForVehicle/{carModelId}
+        //GET /api/ServiceCatalog/AvailableForVehicle/{carType}
         [HttpGet("AvailableForVehicle/{carModelId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<IEnumerable<ServiceCatalog>>> GetAvailableServices(int carModelId)
         {
-
-          var carModel = await _context.CarModels
-        .Include(cm => cm.CarModelServices)
-        .ThenInclude(cms => cms.ServiceCatalog)
+         var carModel = await _context.CarModels
+        .Include(cm => cm.CarType)
         .FirstOrDefaultAsync(cm => cm.Id == carModelId);
 
             if (carModel == null)
                 return NotFound("Vehicle not found");
 
-            var compatibleServices = carModel.CarModelServices
-                .Select(cms => cms.ServiceCatalog)
-                .ToList();
+            var carTypeId = carModel.CarTypeId;
 
-            return Ok(compatibleServices);
+            var services = await _context.CarTypeServices
+                .Where(cts => cts.CarTypeId == carTypeId)
+                .Select(cts => cts.ServiceCatalog)
+                .Distinct()
+                .ToListAsync();
+
+            return Ok(services);
 
         }
     }
