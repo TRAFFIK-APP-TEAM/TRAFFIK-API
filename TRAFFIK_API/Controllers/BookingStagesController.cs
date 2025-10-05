@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using TRAFFIK_API.Data;
 using TRAFFIK_API.Models;
 using TRAFFIK_API.DTOs;
+using Microsoft.AspNetCore.Authorization;
 
 namespace TRAFFIK_API.Controllers
 {
@@ -142,11 +143,16 @@ namespace TRAFFIK_API.Controllers
         }
 
         //POST /api/BookingStages/UpdateStage
+        [Authorize(Roles = "Employee,Admin")]
         [HttpPost("UpdateStage")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> UpdateStage([FromBody] BookingStageUpdateDto dto)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
             var booking = await _context.Bookings.FindAsync(dto.BookingId);
             var user = await _context.Users.FindAsync(dto.UpdatedByUserId);
 
