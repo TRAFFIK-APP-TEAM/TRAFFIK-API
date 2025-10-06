@@ -22,9 +22,7 @@ namespace TRAFFIK_API.Controllers
         }
 
         // GET: api/ServiceCatalogs
-        /// <summary>
         /// Retrieves all service catalog entries.
-        /// </summary>
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<IEnumerable<ServiceCatalog>>> GetServiceCatalogs()
@@ -33,10 +31,7 @@ namespace TRAFFIK_API.Controllers
         }
 
         // GET: api/ServiceCatalogs/5
-        /// <summary>
         /// Retrieves a specific service catalog entry by ID.
-        /// </summary>
-        /// <param name="id">The ID of the service catalog item to retrieve.</param>
         [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -53,12 +48,7 @@ namespace TRAFFIK_API.Controllers
         }
 
         // PUT: api/ServiceCatalogs/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        /// <summary>
         /// Updates an existing service catalog entry.
-        /// </summary>
-        /// <param name="id">The ID of the service catalog item to update.</param>
-        /// <param name="serviceCatalog">The updated service catalog object.</param>
         [HttpPut("{id}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -92,11 +82,7 @@ namespace TRAFFIK_API.Controllers
         }
 
         // POST: api/ServiceCatalogs
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        /// <summary>
         /// Creates a new service catalog entry.
-        /// </summary>
-        /// <param name="serviceCatalog">The service catalog object to create.</param>
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -109,10 +95,7 @@ namespace TRAFFIK_API.Controllers
         }
 
         // DELETE: api/ServiceCatalogs/5
-        /// <summary>
         /// Deletes a service catalog entry by ID.
-        /// </summary>
-        /// <param name="id">The ID of the service catalog item to delete.</param>
         [HttpDelete("{id}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -135,36 +118,65 @@ namespace TRAFFIK_API.Controllers
             return _context.ServiceCatalogs.Any(e => e.Id == id);
         }
 
-        // for now doesnt work, must add selection logic later
-        // GET: api/ServiceCatalog/AvailableForVehicle/{carType} 
-        /// <summary>
-        /// Retrieves available services for a specific vehicle model.
-        /// </summary>
-        /// <param name="carModelId">The ID of the car model to check services for.</param>
-        /// 
-        //GET /api/ServiceCatalog/AvailableForVehicle/{carType}
+        // GET: api/ServiceCatalog/AvailableForVehicle/{carModelId}
         [HttpGet("AvailableForVehicle/{carModelId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<IEnumerable<ServiceCatalog>>> GetAvailableServices(int carModelId)
+        public async Task<ActionResult<IEnumerable<ServiceCatalog>>> GetAvailableServices(int carModelId, string? sortBy = "name", string? direction = "asc")
         {
-         var carModel = await _context.CarModels
-        .Include(cm => cm.CarType)
-        .FirstOrDefaultAsync(cm => cm.Id == carModelId); 
+            var carModel = await _context.CarModels
+                .Include(cm => cm.CarType)
+                .FirstOrDefaultAsync(cm => cm.Id == carModelId);
 
             if (carModel == null)
                 return NotFound("Vehicle not found");
 
             var carTypeId = carModel.CarTypeId;
 
-            var services = await _context.CarTypeServices
+            var query = _context.CarTypeServices
                 .Where(cts => cts.CarTypeId == carTypeId)
                 .Select(cts => cts.ServiceCatalog)
-                .Distinct()
-                .ToListAsync();
+                .Distinct();
 
+            bool desc = string.Equals(direction, "desc", StringComparison.OrdinalIgnoreCase);
+            if (string.Equals(sortBy, "price", StringComparison.OrdinalIgnoreCase))
+            {
+                query = desc ? query.OrderByDescending(s => s.Price) : query.OrderBy(s => s.Price);
+            }
+            else
+            {
+                query = desc ? query.OrderByDescending(s => s.Name) : query.OrderBy(s => s.Name);
+            }
+
+            var services = await query.ToListAsync();
             return Ok(services);
+        }
 
+        // GET: api/ServiceCatalog/ByCarType/{carTypeId}
+        /// <summary>
+        /// Retrieves available services for a specific car type id, sorted by price or name.
+        /// </summary>
+        [HttpGet("ByCarType/{carTypeId}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<ActionResult<IEnumerable<ServiceCatalog>>> GetServicesByCarType(int carTypeId, string? sortBy = "name", string? direction = "asc")
+        {
+            var query = _context.CarTypeServices
+                .Where(cts => cts.CarTypeId == carTypeId)
+                .Select(cts => cts.ServiceCatalog)
+                .Distinct();
+
+            bool desc = string.Equals(direction, "desc", StringComparison.OrdinalIgnoreCase);
+            if (string.Equals(sortBy, "price", StringComparison.OrdinalIgnoreCase))
+            {
+                query = desc ? query.OrderByDescending(s => s.Price) : query.OrderBy(s => s.Price);
+            }
+            else
+            {
+                query = desc ? query.OrderByDescending(s => s.Name) : query.OrderBy(s => s.Name);
+            }
+
+            var services = await query.ToListAsync();
+            return Ok(services);
         }
     }
 }

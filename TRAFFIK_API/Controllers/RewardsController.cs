@@ -130,14 +130,102 @@ namespace TRAFFIK_API.Controllers
             return NoContent();
         }
 
-        /// <summary>
-        /// Checks if a reward exists by ID.
-        /// </summary>
-        /// <param name="id">The ID to check.</param>
-        /// <returns>True if the reward exists; otherwise, false.</returns>
         private bool RewardExists(int id)
         {
             return _context.Rewards.Any(e => e.Id == id);
+        }
+
+        [HttpGet("User/{userId}/balance")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<ActionResult<int>> GetUserRewardBalance(int userId)
+        {
+            var balance = await _context.Rewards
+                .Where(r => r.UserId == userId && !r.Redeemed)
+                .SumAsync(r => (int?)r.Points) ?? 0;
+            return Ok(balance);
+        }
+
+        public class EarnRewardRequest
+        {
+            public int UserId { get; set; }
+            public int Points { get; set; }
+            public string Type { get; set; }
+        }
+
+        // POST: api/Reward/earn
+        /// Adds reward points for a user.
+        [HttpPost("earn")]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult<Reward>> Earn(EarnRewardRequest request)
+        {
+            if (request.Points <= 0)
+                return BadRequest("Points must be positive");
+
+            var reward = new Reward
+            {
+                UserId = request.UserId,
+                Points = request.Points,
+                Type = request.Type,
+                Redeemed = false
+            };
+            _context.Rewards.Add(reward);
+            await _context.SaveChangesAsync();
+            return CreatedAtAction(nameof(GetReward), new { id = reward.Id }, reward);
+        }
+
+        public class RedeemRewardRequest
+        {
+            public int UserId { get; set; }
+            public int Points { get; set; }
+        }
+
+        // POST: api/Reward/redeem
+        /// <summary>
+        /// Redeems a number of reward points for a user, consuming oldest unredeemed rewards first.
+        /// </summary>
+        [HttpPost("redeem")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult> Redeem(RedeemRewardRequest request)
+        {
+            if (request.Points <= 0)
+                return BadRequest("Points must be positive");
+
+            var availablePoints = await _context.Rewards
+                .Where(r => r.UserId == request.UserId && !r.Redeemed)
+                .SumAsync(r => (int?)r.Points) ?? 0;
+
+            if (availablePoints < request.Points)
+                return BadRequest("Insufficient points");
+
+            // Simple strategy: mark full reward rows as redeemed until covered
+            var unredeemed = await _context.Rewards
+                .Where(r => r.UserId == request.UserId && !r.Redeemed)
+                .OrderBy(r => r.Id)
+                .ToListAsync();
+
+            int remaining = request.Points;
+            foreach (var r in unredeemed)
+            {
+                if (remaining <= 0) break;
+
+                if (r.Points <= remaining)
+                {
+                    remaining -= r.Points;
+                    r.Redeemed = true;
+                }
+                else
+                {
+                    // Split record: reduce current points and create a redeemed row for the consumed part
+                    int consumed = remaining;
+                    r.Points -= consumed;
+                    remaining = 0;
+                }
+            }
+
+            await _context.SaveChangesAsync();
+            return Ok(new { redeemed = request.Points });
         }
     }
 }

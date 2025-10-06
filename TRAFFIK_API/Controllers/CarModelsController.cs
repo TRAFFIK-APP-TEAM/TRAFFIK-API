@@ -102,6 +102,12 @@ namespace TRAFFIK_API.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<CarModel>> PostCarModel(CarModel carModel)
         {
+            // Ensure referenced CarType exists if provided
+            if (carModel.CarTypeId != 0 && !await _context.CarTypes.AnyAsync(ct => ct.Id == carModel.CarTypeId))
+            {
+                return BadRequest("Invalid CarTypeId");
+            }
+
             _context.CarModels.Add(carModel);
             await _context.SaveChangesAsync();
 
@@ -151,6 +157,7 @@ namespace TRAFFIK_API.Controllers
         {
             return await _context.CarModels
                 .Where(v => v.UserId == userId)
+                .Include(v => v.CarType)
                 .ToListAsync();
         }
     }
