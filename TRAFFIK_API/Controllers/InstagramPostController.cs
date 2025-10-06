@@ -23,6 +23,7 @@ namespace TRAFFIK_API.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<IEnumerable<InstagramPost>>> GetInstagramPosts()
         {
+            //GET ACCESS TOKEN THROUGH GRAPH AP - FACEBOOK DEVELOPER
             var accessToken = "";
             var url = $"https://graph.instagram.com/me/media?fields=id,caption,media_url,media_type,timestamp&access_token={accessToken}";
 
