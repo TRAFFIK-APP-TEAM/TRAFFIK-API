@@ -1,6 +1,62 @@
-@TRAFFIK_API_HostAddress = http://localhost:5027
+@base = http://localhost:5027
+@json = application/json
 
-GET {{TRAFFIK_API_HostAddress}}/weatherforecast/
-Accept: application/json
+### Test basic endpoints
+GET {{base}}/api/User
+Accept: {{json}}
+
+###
+GET {{base}}/api/CarTypes
+Accept: {{json}}
+
+###
+GET {{base}}/api/ServiceCatalog
+Accept: {{json}}
+
+###
+GET {{base}}/api/UserRole
+Accept: {{json}}
+
+###
+GET {{base}}/api/Bookings
+Accept: {{json}}
+
+###
+
+### Auth endpoints
+POST {{base}}/api/Auth/Register
+Content-Type: {{json}}
+
+{
+  "fullName": "Test User",
+  "email": "test@example.com",
+  "password": "TestPassword123!",
+  "phoneNumber": "1234567890",
+  "roleId": 1
+}
+
+###
+POST {{base}}/api/Auth/Login
+Content-Type: {{json}}
+
+{
+  "email": "test@example.com",
+  "password": "TestPassword123!"
+}
+
+###
+POST {{base}}/api/Auth/Logout
+Accept: {{json}}
+
+###
+
+### Create a CarType (POST example)
+POST {{base}}/api/CarTypes
+Content-Type: {{json}}
+
+{
+  "name": "SUV",
+  "description": "Sports Utility Vehicle"
+}
 
 ###

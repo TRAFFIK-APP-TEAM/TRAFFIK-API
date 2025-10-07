@@ -80,29 +80,37 @@ namespace TRAFFIK_API.Auth
         [HttpPost("Login")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        public IActionResult Login(UserLoginDto dto)
+        public async Task<IActionResult> Login(UserLoginDto dto)
         {
-            var user = _context.Users.SingleOrDefault(u => u.Email == dto.Email);
-            if (user == null)
+            try
             {
-                return Unauthorized("Invalid email or password.");
-            }
+                var user = await Task.Run(() => _context.Users.SingleOrDefault(u => u.Email == dto.Email));
+                if (user == null)
+                {
+                    return Unauthorized("Invalid email or password.");
+                }
 
-            var hashedPassword = HashPassword(dto.Password);
-            if (user.PasswordHash != hashedPassword)
-            {
-                return Unauthorized("Invalid email or password.");
-            }
+                var hashedPassword = HashPassword(dto.Password);
+                if (user.PasswordHash != hashedPassword)
+                {
+                    return Unauthorized("Invalid email or password.");
+                }
 
-            //FUTURE JWT WILL BE IMPLEMENTED HERE
-            return Ok(new
+                //FUTURE JWT WILL BE IMPLEMENTED HERE
+                return Ok(new
+                {
+                    user.Id,
+                    user.FullName,
+                    user.Email,
+                    user.PhoneNumber,
+                    user.RoleId
+                });
+            }
+            catch (Exception ex)
             {
-                user.Id,
-                user.FullName,
-                user.Email,
-                user.PhoneNumber,
-                user.RoleId
-            });
+                // Log the error and return 500 with details
+                return StatusCode(500, new { error = ex.Message, stackTrace = ex.StackTrace });
+            }
         }
 
         /// <summary>
