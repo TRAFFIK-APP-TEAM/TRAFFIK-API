@@ -23,7 +23,7 @@
         /// <summary>
         /// The ID of the car model associated with the booking.
         /// </summary>
-        public int CarModelId { get; set; }
+        public int VehicleLicensePlate { get; set; }
 
         /// <summary>
         /// The time of the booking.

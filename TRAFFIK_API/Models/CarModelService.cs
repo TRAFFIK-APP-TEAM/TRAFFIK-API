@@ -3,8 +3,8 @@
     public class CarModelService
     {
 
-        public int CarModelId { get; set; }
-        public CarModel CarModel { get; set; }
+        public int VehicleModelId { get; set; }
+        public Vehicle VehicleModel { get; set; }
 
         public int ServiceCatalogId { get; set; }
         public ServiceCatalog ServiceCatalog { get; set; }

@@ -1,14 +1,23 @@
-﻿namespace TRAFFIK_API.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace TRAFFIK_API.Models
 {
+    /*public enum VehicleTpe{
+        Bike,
+        Sedan,
+        SUV,
+        Minivane,
+        Truck,
+        Caravan,
+        Boat    
+    }*/
     /// <summary>
     /// Represents a vehicle owned by a user.
     /// </summary>
-    public class CarModel
+    public class Vehicle
     {
-        /// <summary>
-        /// The unique identifier for the car model.
-        /// </summary>
-        public int Id { get; set; }
+        [Key]
+        public string LicensePlate { get; set; } //PK
 
         /// <summary>
         /// The ID of the user who owns the vehicle.
@@ -25,17 +34,14 @@
         /// </summary>
         public string Model { get; set; } // e.g "GTR35"
 
+        public string ImageURL { get; set; }
+
         /// <summary>
         /// The manufacturing year of the vehicle.
         /// </summary>
         public int Year { get; set; }
-
-        /// <summary>
-        /// The license plate number of the vehicle.
-        /// </summary>
-        public string PlateNumber { get; set; }
-        public int CarTypeId { get; set; }
-        public CarType CarType { get; set; }
+        public string VehicleType { get; set; }
+        //public VehicleTpye VehicleType { get; set; }
 
         public User User { get; set; }
        
