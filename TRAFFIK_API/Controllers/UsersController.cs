@@ -13,7 +13,7 @@ namespace TRAFFIK_API.Controllers
     /// <summary>
     /// Controller for managing user-related operations.
     /// </summary>
-    [Route("api/User")]
+    [Route("api/Users")]
     [ApiController]
     public class UsersController : ControllerBase
     {

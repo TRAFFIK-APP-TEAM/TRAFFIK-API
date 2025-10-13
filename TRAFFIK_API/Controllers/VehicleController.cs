@@ -10,67 +10,67 @@ using TRAFFIK_API.Models;
 
 namespace TRAFFIK_API.Controllers
 {
-    [Route("api/CarModels")]
+    [Route("api/Vehicle")]
     [ApiController]
-    public class CarModelsController : ControllerBase
+    public class VehicleController : ControllerBase
     {
         private readonly AppDbContext _context;
 
-        public CarModelsController(AppDbContext context)
+        public VehicleController(AppDbContext context)
         {
             _context = context;
         }
 
-        // GET: api/CarModels
+        // GET: api/Vehicle
         /// <summary>
-        /// Retrieves all car models.
+        /// Retrieves all vehicles.
         /// </summary>
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<IEnumerable<CarModel>>> GetCarModels()
+        public async Task<ActionResult<IEnumerable<Models.Vehicle>>> GetVehicles()
         {
-            return await _context.CarModels.ToListAsync();
+            return await _context.Vehicles.ToListAsync();
         }
 
-        // GET: api/CarModels/5
+        // GET: api/Vehicle/5 ?? api/Vehicle/{licensePlate} UHHH DOESNT REALLY MAKE SENSE BUT IM PROBS SLEEP DEPRIVED ATP
         /// <summary>
-        /// Retrieves a specific car model by ID.
+        /// Retrieves a specific vehicle by License Plate.
         /// </summary>
-        /// <param name="id">The ID of the car model to retrieve.</param>
+        /// <param name="id">The ID of the vehicle to retrieve.</param>
         [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<CarModel>> GetCarModel(int id)
+        public async Task<ActionResult<Models.Vehicle>> GetVehicle(int id)
         {
-            var carModel = await _context.CarModels.FindAsync(id);
+            var vehicle = await _context.Vehicles.FindAsync(id);
 
-            if (carModel == null)
+            if (vehicle == null)
             {
                 return NotFound();
             }
 
-            return carModel;
+            return vehicle;
         }
 
         // PUT: api/CarModels/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         /// <summary>
-        /// Updates an existing car model.
+        /// Updates an existing Vehicle.
         /// </summary>
-        /// <param name="id">The ID of the car model to update.</param>
-        /// <param name="carModel">The updated car model object.</param>
+        /// <param name="licensePlate">The ID of the car model to update.</param>
+        /// <param name="Vehicle">The updated car model object.</param>
         [HttpPut("{id}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> PutCarModel(int id, CarModel carModel)
+        public async Task<IActionResult> PutVehicle(int id, Models.Vehicle vehicle)
         {
-            if (id != carModel.Id)
+            if (id != vehicle.Id)
             {
                 return BadRequest();
             }
 
-            _context.Entry(carModel).State = EntityState.Modified;
+            _context.Entry(vehicle).State = EntityState.Modified;
 
             try
             {
@@ -78,7 +78,7 @@ namespace TRAFFIK_API.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!CarModelExists(id))
+                if (!Vehicle.lExists(id))
                 {
                     return NotFound();
                 }
@@ -96,22 +96,22 @@ namespace TRAFFIK_API.Controllers
         /// <summary>
         /// Creates a new car model.
         /// </summary>
-        /// <param name="carModel">The car model object to create.</param>
+        /// <param name="vehicle">The car model object to create.</param>
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<CarModel>> PostCarModel(CarModel carModel)
+        public async Task<ActionResult<Models.Vehicle>> PosVehicle(Models.Vehicle vehicle)
         {
             // Ensure referenced CarType exists if provided
-            if (carModel.CarTypeId != 0 && !await _context.CarTypes.AnyAsync(ct => ct.Id == carModel.CarTypeId))
+            if (vehicle.CarTypeId != 0 && !await _context.Vehicles.AnyAsync(ct => ct.Id == vehicle.CarTypeId))
             {
                 return BadRequest("Invalid CarTypeId");
             }
 
-            _context.CarModels.Add(carModel);
+            _context.Vehicles.Add(vehicle);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetCarModel", new { id = carModel.Id }, carModel);
+            return CreatedAtAction("GetVehicle", new { id = vehicle.Id }, vehicle);
         }
 
         // DELETE: api/CarModels/5
@@ -122,15 +122,15 @@ namespace TRAFFIK_API.Controllers
         [HttpDelete("{id}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> DeleteCarModel(int id)
+        public async Task<IActionResult> DeleteVehicle(int id)
         {
-            var carModel = await _context.CarModels.FindAsync(id);
+            var vehicle = await _context.Vehicles.FindAsync(id);
             if (carModel == null)
             {
                 return NotFound();
             }
 
-            _context.CarModels.Remove(carModel);
+            _context.Vehicles.Remove(vehicle);
             await _context.SaveChangesAsync();
 
             return NoContent();
@@ -141,9 +141,9 @@ namespace TRAFFIK_API.Controllers
         /// </summary>
         /// <param name="id">The ID to check.</param>
         /// <returns>True if the car model exists; otherwise, false.</returns>
-        private bool CarModelExists(int id)
+        private bool VehicleExists(int id)
         {
-            return _context.CarModels.Any(e => e.Id == id);
+            return _context.Vehicles.Any(e => e.Id == id);
         }
 
         // GET: api/CarModels/User/{userId}      gets users vehicles
@@ -153,11 +153,11 @@ namespace TRAFFIK_API.Controllers
         /// <param name="userId">The ID of the user whose vehicles to retrieve.</param>
         [HttpGet("User/{userId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<IEnumerable<CarModel>>> GetUserVehicles(int userId)
+        public async Task<ActionResult<IEnumerable<Models.Vehicle>>> GetUserVehicles(int userId)
         {
-            return await _context.CarModels
+            return await _context.Vehicle
                 .Where(v => v.UserId == userId)
-                .Include(v => v.CarType)
+                .Include(v => v.VehicleType)
                 .ToListAsync();
         }
     }

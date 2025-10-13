@@ -125,7 +125,7 @@ namespace TRAFFIK_API.Controllers
         public async Task<ActionResult<IEnumerable<ServiceCatalog>>> GetAvailableServices(int carModelId, string? sortBy = "name", string? direction = "asc")
         {
             var carModel = await _context.CarModels
-                .Include(cm => cm.CarType)
+                .Include(cm => cm.VehicleType)
                 .FirstOrDefaultAsync(cm => cm.Id == carModelId);
 
             if (carModel == null)

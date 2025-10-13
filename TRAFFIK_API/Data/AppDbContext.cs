@@ -10,7 +10,7 @@ namespace TRAFFIK_API.Data
         }
 
         public DbSet<User> Users { get; set; } = default!;
-        public DbSet<CarModel> CarModels { get; set; } = default!;
+        public DbSet<Vehicle> CarModels { get; set; } = default!;
         public DbSet<CarModelService> CarModelServices { get; set; } = default!;
         public DbSet<ServiceCatalog> ServiceCatalogs { get; set; } = default!;
         public DbSet<Booking> Bookings { get; set; } = default!;
@@ -21,8 +21,8 @@ namespace TRAFFIK_API.Data
         public DbSet<Review> Reviews { get; set; } = default!;
         public DbSet<Reward> Rewards { get; set; } = default!;
         public DbSet<ServiceHistory> ServiceHistories { get; set; } = default!;
-        public DbSet<CarType> CarTypes { get; set; }
         public DbSet<CarTypeServices> CarTypeServices { get; set; }
+        public DbSet<Vehicle> Vehicles { get; set; }
 
 
         // Override OnModelCreating if you need to configure relationships, keys, etc.
