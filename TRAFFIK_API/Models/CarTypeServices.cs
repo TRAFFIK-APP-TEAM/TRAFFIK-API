@@ -2,7 +2,7 @@
 {
     public class CarTypeServices
     {
-        public int VehicleTypeId { get; set; }
+        public string VehicleTypeId { get; set; }
         public Vehicle VehicleType { get; set; }
 
         public int ServiceCatalogId { get; set; }

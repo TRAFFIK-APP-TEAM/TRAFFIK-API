@@ -122,19 +122,18 @@ namespace TRAFFIK_API.Controllers
         [HttpGet("AvailableForVehicle/{carModelId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<IEnumerable<ServiceCatalog>>> GetAvailableServices(int carModelId, string? sortBy = "name", string? direction = "asc")
+        public async Task<ActionResult<IEnumerable<ServiceCatalog>>> GetAvailableServices(string licensePlate, string? sortBy = "name", string? direction = "asc")
         {
-            var carModel = await _context.CarModels
-                .Include(cm => cm.VehicleType)
-                .FirstOrDefaultAsync(cm => cm.Id == carModelId);
+            var vehicle = await _context.Vehicles
+                .FirstOrDefaultAsync(v => v.LicensePlate == licensePlate);
 
-            if (carModel == null)
+            if (vehicle == null)
                 return NotFound("Vehicle not found");
 
-            var carTypeId = carModel.CarTypeId;
+            var vehicleType = vehicle.VehicleType;
 
             var query = _context.CarTypeServices
-                .Where(cts => cts.CarTypeId == carTypeId)
+                .Where(cts => cts.VehicleTypeId == vehicleType)
                 .Select(cts => cts.ServiceCatalog)
                 .Distinct();
 
@@ -158,11 +157,11 @@ namespace TRAFFIK_API.Controllers
         /// </summary>
         [HttpGet("ByCarType/{carTypeId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<IEnumerable<ServiceCatalog>>> GetServicesByCarType(int carTypeId, string? sortBy = "name", string? direction = "asc")
+        public async Task<ActionResult<IEnumerable<ServiceCatalog>>> GetServicesByCarType(string vehicleTypeId, string? sortBy = "name", string? direction = "asc")
         {
             var query = _context.CarTypeServices
-                .Where(cts => cts.CarTypeId == carTypeId)
-                .Select(cts => cts.ServiceCatalog)
+                .Where(vt => vt.VehicleTypeId == vehicleTypeId)
+                .Select(vt => vt.ServiceCatalog)
                 .Distinct();
 
             bool desc = string.Equals(direction, "desc", StringComparison.OrdinalIgnoreCase);

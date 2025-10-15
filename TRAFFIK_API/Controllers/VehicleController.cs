@@ -118,7 +118,7 @@ namespace TRAFFIK_API.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> DeleteVehicle(string licensePlate)
         {
-            var vehicle = await _context.Vehicles.FindAsync(id);
+            var vehicle = await _context.Vehicles.FindAsync(licensePlate);
             if (vehicle == null)
             {
                 return NotFound();

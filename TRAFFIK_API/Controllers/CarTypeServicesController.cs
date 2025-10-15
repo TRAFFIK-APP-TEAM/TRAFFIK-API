@@ -28,11 +28,11 @@ namespace TRAFFIK_API.Controllers
             return await _context.CarTypeServices.ToListAsync();
         }
 
-        // GET: api/CarTypeServices/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<CarTypeServices>> GetCarTypeServices(int id)
+        // GET: api/CarTypeServices/{vehicleTypeId}/{serviceCatalogId}
+        [HttpGet("{vehicleTypeId:int}/{serviceCatalogId:int}")]
+        public async Task<ActionResult<CarTypeServices>> GetCarTypeServices(string vehicleTypeId, int serviceCatalogId)
         {
-            var carTypeServices = await _context.CarTypeServices.FindAsync(id);
+            var carTypeServices = await _context.CarTypeServices.FindAsync(vehicleTypeId, serviceCatalogId);
 
             if (carTypeServices == null)
             {
@@ -42,12 +42,12 @@ namespace TRAFFIK_API.Controllers
             return carTypeServices;
         }
 
-        // PUT: api/CarTypeServices/5
+        // PUT: api/CarTypeServices/{vehicleTypeId}/{serviceCatalogId}
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutCarTypeServices(int id, CarTypeServices carTypeServices)
+        [HttpPut("{vehicleId:int}/{serviceCatalogId:int}")]
+        public async Task<IActionResult> PutCarTypeServices(string vehicleTypeId, int serviceCatalogId, CarTypeServices carTypeServices)
         {
-            if (id != carTypeServices.CarTypeId)
+            if (vehicleTypeId != carTypeServices.VehicleTypeId || serviceCatalogId != carTypeServices.ServiceCatalogId)
             {
                 return BadRequest();
             }
@@ -60,7 +60,7 @@ namespace TRAFFIK_API.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!CarTypeServicesExists(id))
+                if (!CarTypeServicesExists(vehicleTypeId, serviceCatalogId))
                 {
                     return NotFound();
                 }
@@ -85,7 +85,7 @@ namespace TRAFFIK_API.Controllers
             }
             catch (DbUpdateException)
             {
-                if (CarTypeServicesExists(carTypeServices.CarTypeId))
+                if (CarTypeServicesExists(carTypeServices.VehicleTypeId, carTypeServices.ServiceCatalogId))
                 {
                     return Conflict();
                 }
@@ -95,14 +95,14 @@ namespace TRAFFIK_API.Controllers
                 }
             }
 
-            return CreatedAtAction("GetCarTypeServices", new { id = carTypeServices.CarTypeId }, carTypeServices);
+            return CreatedAtAction(nameof(GetCarTypeServices), new { vehicleTypeId = carTypeServices.VehicleTypeId, serviceCatalogId = carTypeServices.ServiceCatalogId }, carTypeServices);
         }
 
-        // DELETE: api/CarTypeServices/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteCarTypeServices(int id)
+        // DELETE: api/CarTypeServices/{vehicleTypeId}/{serviceCatalogId}
+        [HttpDelete("{vehicleTypeId:int}/{serviceCatalog:int}")]
+        public async Task<IActionResult> DeleteCarTypeServices(string vehicleTypeId, int serviceCatalogId)
         {
-            var carTypeServices = await _context.CarTypeServices.FindAsync(id);
+            var carTypeServices = await _context.CarTypeServices.FindAsync(vehicleTypeId, serviceCatalogId);
             if (carTypeServices == null)
             {
                 return NotFound();
@@ -114,9 +114,9 @@ namespace TRAFFIK_API.Controllers
             return NoContent();
         }
 
-        private bool CarTypeServicesExists(int id)
+        private bool CarTypeServicesExists(string vehicleTypeId, int serviceCatalogId)
         {
-            return _context.CarTypeServices.Any(e => e.CarTypeId == id);
+            return _context.CarTypeServices.Any(e => e.VehicleTypeId == vehicleTypeId && e.ServiceCatalogId == serviceCatalogId);
         }
     }
 }

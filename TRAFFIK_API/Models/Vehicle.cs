@@ -48,6 +48,7 @@ namespace TRAFFIK_API.Models
         public ICollection<Booking> Bookings { get; set; } = new List<Booking>();
         public ICollection<CarModelService> CarModelServices { get; set; } = new List<CarModelService>();
         public ICollection<ServiceHistory> ServiceHistories { get; set; } = new List<ServiceHistory>();
+        public ICollection<CarTypeServices> CarTypeServices { get; set; } = new List<CarTypeServices>();
         //public ICollection<ServiceCatalog>Services { get; set; } = new List<ServiceCatalog>();
 
     }

@@ -26,7 +26,7 @@ namespace TRAFFIK_API.Controllers
         public async Task<IActionResult> TrackService([FromBody] ServiceHistoryDto dto)
         {
             var user = await _context.Users.FindAsync(dto.UserId);
-            var vehicle = await _context.CarModels.FindAsync(dto.VehicleId);
+            var vehicle = await _context.Vehicles.FindAsync(dto.VehicleLicensePlate);
             var service = await _context.ServiceCatalogs.FindAsync(dto.ServiceCatalogId);
 
             if (user == null || vehicle == null || service == null)
@@ -34,7 +34,7 @@ namespace TRAFFIK_API.Controllers
 
             var wash = new ServiceHistory
             {
-                CarModelId = dto.VehicleId,
+                VehicleLicensePlate = dto.VehicleLicensePlate,
                 ServiceCatalogId = dto.ServiceCatalogId,
                 CompletedAt = DateTime.UtcNow,
                 UserId = dto.UserId
@@ -46,19 +46,19 @@ namespace TRAFFIK_API.Controllers
             return Ok("Wash tracked successfully.");
         }
 
-        [HttpGet("Vehicle/{vehicleId}")]
+        [HttpGet("Vehicle/{vehicleLicensePlate}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<IEnumerable<ServiceHistory>>> GetServiceHistoryByCar(int vehicleId)
+        public async Task<ActionResult<IEnumerable<ServiceHistory>>> GetServiceHistoryByCar(string vehicleLicensePlate)
         {
-            var vehicle = await _context.CarModels.FindAsync(vehicleId);
+            var vehicle = await _context.Vehicles.FindAsync(vehicleLicensePlate);
             if (vehicle == null)
                 return NotFound("Vehicle not found.");
 
             var history = await _context.ServiceHistories
                 .Include(h => h.User)
                 .Include(h => h.ServiceCatalog)
-                .Where(h => h.CarModelId == vehicleId)
+                .Where(h => h.VehicleLicensePlate == vehicleLicensePlate)
                 .ToListAsync();
 
             return Ok(history);
@@ -70,7 +70,7 @@ namespace TRAFFIK_API.Controllers
         {
             var history = await _context.ServiceHistories
                 .Include(h => h.User)
-                .Include(h => h.CarModel)
+                .Include(h => h.Vehicle)
                 .Include(h => h.ServiceCatalog)
                 .ToListAsync();
 
