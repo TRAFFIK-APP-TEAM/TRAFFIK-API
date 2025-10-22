@@ -20,6 +20,7 @@ namespace TRAFFIK_API.Data
         public DbSet<UserRole> UserRoles { get; set; } = default!;
         public DbSet<Review> Reviews { get; set; } = default!;
         public DbSet<Reward> Rewards { get; set; } = default!;
+        public DbSet<RewardItem> RewardItems { get; set; }
         public DbSet<ServiceHistory> ServiceHistories { get; set; } = default!;
         public DbSet<CarTypeServices> CarTypeServices { get; set; } = default!;
 
