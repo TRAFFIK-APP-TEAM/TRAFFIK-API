@@ -32,7 +32,7 @@ namespace TRAFFIK_API.Controllers
             return await _context.Vehicles.ToListAsync();
         }
 
-        // GET: api/Vehicle/{licenseplate}
+        // GET: api/Vehicle/{licensePlate}
         /// <summary>
         /// Retrieves a specific vehicle by License Plate.
         /// </summary>
@@ -53,7 +53,6 @@ namespace TRAFFIK_API.Controllers
         }
 
         // PUT: api/Vehicle/{licensePlate}
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         /// <summary>
         /// Updates an existing Vehicle.
         /// </summary>
@@ -92,7 +91,6 @@ namespace TRAFFIK_API.Controllers
         }
 
         // POST: api/Vehicle
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         /// <summary>
         /// Creates a new vehicle.
         /// </summary>
@@ -131,27 +129,26 @@ namespace TRAFFIK_API.Controllers
         }
 
         /// <summary>
-        /// Checks if vehicle exists by license Plate.
+        /// Checks if vehicle exists by license plate.
         /// </summary>
-        /// <param name="licensePlate">The ID to check.</param>
+        /// <param name="licensePlate">The license plate to check.</param>
         /// <returns>True if the vehicle exists; otherwise, false.</returns>
         private bool VehicleExists(string licensePlate)
         {
             return _context.Vehicles.Any(e => e.LicensePlate == licensePlate);
         }
 
-        // GET: api/CarModels/User/{userId}      gets users vehicles
+        // GET: api/Vehicle/User/{userId}
         /// <summary>
         /// Retrieves all vehicles associated with a specific user.
         /// </summary>
         /// <param name="userId">The ID of the user whose vehicles to retrieve.</param>
         [HttpGet("User/{userId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<IEnumerable<Models.Vehicle>>> GetUserVehicles(int userId)
+        public async Task<ActionResult<IEnumerable<Vehicle>>> GetUserVehicles(int userId)
         {
             return await _context.Vehicles
                 .Where(v => v.UserId == userId)
-                .Include(v => v.VehicleType)
                 .ToListAsync();
         }
     }
