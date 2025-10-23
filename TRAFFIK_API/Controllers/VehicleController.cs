@@ -151,5 +151,22 @@ namespace TRAFFIK_API.Controllers
                 .Where(v => v.UserId == userId)
                 .ToListAsync();
         }
+
+        // GET: api/Vehicle/Types
+        /// <summary>
+        /// Retrieves all vehicle types from the database.
+        /// </summary>
+        [HttpGet("Types")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<ActionResult<IEnumerable<string>>> GetVehicleTypes()
+        {
+            var types = await _context.VehicleTypes
+                .OrderBy(v => v.TypeName)
+                .Select(v => v.TypeName)
+                .ToListAsync();
+
+            return Ok(types);
+        }
+
     }
 }

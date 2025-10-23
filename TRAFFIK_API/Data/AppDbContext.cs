@@ -26,8 +26,8 @@ namespace TRAFFIK_API.Data
 
         // Override OnModelCreating if you need to configure relationships, keys, etc.
         public DbSet<RewardRedemption> RewardRedemptions { get; set; }
+        public DbSet<VehicleType> VehicleTypes { get; set; }
 
-    
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
