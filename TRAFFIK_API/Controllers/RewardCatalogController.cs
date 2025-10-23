@@ -3,7 +3,6 @@ using Microsoft.EntityFrameworkCore;
 using TRAFFIK_API.Data;
 using TRAFFIK_API.Models;
 using TRAFFIK_API.Models.Dtos;
-using static TRAFFIK_API.Controllers.RewardsController;
 
 namespace TRAFFIK_API.Controllers
 {
@@ -24,6 +23,29 @@ namespace TRAFFIK_API.Controllers
             return await _context.RewardItems.ToListAsync();
         }
 
+        [HttpGet("user/{userId}/redeemed")]
+        public async Task<ActionResult<IEnumerable<RedeemedRewardDto>>> GetRedeemedItems(int userId)
+        {
+            var redemptions = await _context.RewardRedemptions
+                .Where(r => r.UserId == userId)
+                .Include(r => r.Item)
+                .ToListAsync();
+
+            var result = redemptions.Select(r => new RedeemedRewardDto
+            {
+                ItemId = r.ItemId,
+                Name = r.Item.Name,
+                Description = r.Item.Description,
+                Cost = r.Item.Cost,
+                RedeemedAt = r.RedeemedAt,
+                Used = r.Used
+            });
+
+            return Ok(result);
+        }
+
+
+
         [HttpPost("redeem/{itemId}")]
         public async Task<ActionResult> RedeemItem(int itemId, [FromBody] RedeemCatalogItemRequest request)
         {
@@ -43,7 +65,6 @@ namespace TRAFFIK_API.Controllers
                 Points = item.Cost
             };
 
-            // Redeem points directly here instead of nesting controller
             var unredeemed = await _context.Rewards
                 .Where(r => r.UserId == request.UserId && !r.Redeemed)
                 .OrderBy(r => r.Id)
@@ -66,8 +87,31 @@ namespace TRAFFIK_API.Controllers
                 }
             }
 
+            _context.RewardRedemptions.Add(new RewardRedemption
+            {
+                UserId = request.UserId,
+                ItemId = itemId,
+                RedeemedAt = DateTime.UtcNow
+            });
+
             await _context.SaveChangesAsync();
+
             return Ok(new { redeemed = item.Cost, itemId });
+        }
+
+        [HttpPost("user/{userId}/redeemed/{itemId}/use")]
+        public async Task<IActionResult> MarkAsUsed(int userId, int itemId)
+        {
+            var redemption = await _context.RewardRedemptions
+                .FirstOrDefaultAsync(r => r.UserId == userId && r.ItemId == itemId && !r.Used);
+
+            if (redemption == null)
+                return NotFound("Redemption not found or already marked as used.");
+
+            redemption.Used = true;
+            await _context.SaveChangesAsync();
+
+            return NoContent();
         }
     }
 }

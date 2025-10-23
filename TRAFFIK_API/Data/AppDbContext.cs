@@ -25,6 +25,9 @@ namespace TRAFFIK_API.Data
         public DbSet<CarTypeServices> CarTypeServices { get; set; } = default!;
 
         // Override OnModelCreating if you need to configure relationships, keys, etc.
+        public DbSet<RewardRedemption> RewardRedemptions { get; set; }
+
+    
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -45,6 +48,11 @@ namespace TRAFFIK_API.Data
                 .HasOne(cts => cts.ServiceCatalog)
                 .WithMany(sc => sc.CarTypeServices)
                 .HasForeignKey(cts => cts.ServiceCatalogId);
+
+            modelBuilder.Entity<RewardRedemption>()
+                .HasOne<RewardItem>()
+                .WithMany()
+                .HasForeignKey(r => r.ItemId);
 
 
 
