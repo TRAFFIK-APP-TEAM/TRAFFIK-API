@@ -24,7 +24,6 @@ namespace TRAFFIK_API.Data
         public DbSet<ServiceHistory> ServiceHistories { get; set; } = default!;
         public DbSet<CarTypeServices> CarTypeServices { get; set; } = default!;
 
-        // Override OnModelCreating if you need to configure relationships, keys, etc.
         public DbSet<RewardRedemption> RewardRedemptions { get; set; }
         public DbSet<VehicleType> VehicleTypes { get; set; }
 
