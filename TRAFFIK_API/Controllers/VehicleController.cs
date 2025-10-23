@@ -10,7 +10,7 @@ using TRAFFIK_API.Models;
 
 namespace TRAFFIK_API.Controllers
 {
-    [Route("api/Vehicle")]
+    [Route("api/vehicles")]
     [ApiController]
     public class VehicleController : ControllerBase
     {
