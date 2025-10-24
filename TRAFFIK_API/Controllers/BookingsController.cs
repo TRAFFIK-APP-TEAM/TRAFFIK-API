@@ -175,7 +175,7 @@ namespace TRAFFIK_API.Controllers
                 b.BookingDate == booking.BookingDate &&
                 b.BookingTime == booking.BookingTime &&
                 b.ServiceId == booking.ServiceId &&
-                b.VehicleLicensePlate == booking.VehicleLicensePlate);
+                b.CarModelId == booking.CarModelId);
 
             if (conflict)
                 return Conflict("Time slot already booked");

@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TRAFFIK_API.Data;
 using TRAFFIK_API.Models;
+using TRAFFIK_API.DTOs;
 
 namespace TRAFFIK_API.Controllers
 {
@@ -96,12 +97,29 @@ namespace TRAFFIK_API.Controllers
         /// <summary>
         /// Creates a new vehicle.
         /// </summary>
-        /// <param name="vehicle">The vehicle object to create.</param>
+        /// <param name="vehicleDto">The vehicle DTO to create.</param>
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<Vehicle>> PostVehicle(Vehicle vehicle)
+        public async Task<ActionResult<Vehicle>> PostVehicle(VehicleCreateDto vehicleDto)
         {
+            // Check if user exists
+            var user = await _context.Users.FindAsync(vehicleDto.UserId);
+            if (user == null) return BadRequest("User not found");
+            // Create vehicle entity from DTO
+            var vehicle = new Vehicle
+            {
+                UserId = vehicleDto.UserId,
+                Make = vehicleDto.Make,
+                Model = vehicleDto.Model,
+                LicensePlate = vehicleDto.LicensePlate,
+                ImageURL = vehicleDto.ImageUrl,
+                VehicleType = vehicleDto.VehicleType,
+                Color = vehicleDto.Color,
+                Year = vehicleDto.Year,
+                User = user
+            };
+
             _context.Vehicles.Add(vehicle);
             await _context.SaveChangesAsync();
 
@@ -153,6 +171,13 @@ namespace TRAFFIK_API.Controllers
                 .Where(v => v.UserId == userId)
                 .Include(v => v.VehicleType)
                 .ToListAsync();
+        }
+
+        [HttpGet("Types")]
+        public async Task<ActionResult<List<string>>> GetVehicleTypes()
+        {
+            var types = await _context.VehicleTypes.Select(t => t.Type).ToListAsync();
+            return Ok(types);
         }
     }
 }

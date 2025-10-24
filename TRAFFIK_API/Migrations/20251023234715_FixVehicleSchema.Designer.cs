@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using TRAFFIK_API.Data;
@@ -11,9 +12,11 @@ using TRAFFIK_API.Data;
 namespace TRAFFIK_API.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251023234715_FixVehicleSchema")]
+    partial class FixVehicleSchema
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -474,10 +477,6 @@ namespace TRAFFIK_API.Migrations
             modelBuilder.Entity("TRAFFIK_API.Models.Vehicle", b =>
                 {
                     b.Property<string>("LicensePlate")
-                        .HasColumnType("text");
-
-                    b.Property<string>("Color")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("ImageURL")

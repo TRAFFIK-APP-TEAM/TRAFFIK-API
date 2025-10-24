@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using TRAFFIK_API.Data;
@@ -11,9 +12,11 @@ using TRAFFIK_API.Data;
 namespace TRAFFIK_API.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251023144508_SeedData")]
+    partial class SeedData
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -174,7 +177,7 @@ namespace TRAFFIK_API.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("VehicleTypes");
+                    b.ToTable("CarTypes");
                 });
 
             modelBuilder.Entity("TRAFFIK_API.Models.CarTypeServices", b =>
@@ -195,31 +198,6 @@ namespace TRAFFIK_API.Migrations
                     b.HasIndex("VehicleLicensePlate");
 
                     b.ToTable("CarTypeServices");
-                });
-
-            modelBuilder.Entity("TRAFFIK_API.Models.InstagramPost", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("text");
-
-                    b.Property<string>("Caption")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("MediaType")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("MediaUrl")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("Timestamp")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("InstagramPosts");
                 });
 
             modelBuilder.Entity("TRAFFIK_API.Models.Notifications", b =>
@@ -476,10 +454,6 @@ namespace TRAFFIK_API.Migrations
                     b.Property<string>("LicensePlate")
                         .HasColumnType("text");
 
-                    b.Property<string>("Color")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.Property<string>("ImageURL")
                         .IsRequired()
                         .HasColumnType("text");
@@ -682,11 +656,9 @@ namespace TRAFFIK_API.Migrations
 
             modelBuilder.Entity("TRAFFIK_API.Models.ServiceCatalog", b =>
                 {
-                    b.HasOne("TRAFFIK_API.Models.CarType", "CarType")
+                    b.HasOne("TRAFFIK_API.Models.CarType", null)
                         .WithMany("Services")
                         .HasForeignKey("CarTypeId");
-
-                    b.Navigation("CarType");
                 });
 
             modelBuilder.Entity("TRAFFIK_API.Models.ServiceHistory", b =>

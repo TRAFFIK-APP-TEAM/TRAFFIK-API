@@ -6,26 +6,6 @@ using System.Text;
 
 namespace TRAFFIK_API.Auth
 {
-    //What this code does: LOGIN, REGISTER, LOGOUT, DELETE ACCOUNT, HASHPASSWORD 
-    //Things to implement - PASSWORD HASHING, JWT TOKEN GENERATION (JWT), USER VALIDATION
-
-    /*
-     API Endpoints:
-     Register: POST /api/Auth/Register
-     Login: POST /api/Auth/Login
-     Logout: POST /api/Auth/Logout
-     Delete Account: DELETE /api/Auth/Delete/{id}
-     */
-
-    /*
-     Testing URL if running locally
-        HTTP: 5027
-        HTTPS: 7150
-        https://localhost:7150/api/Auth/Register
-        http://localhost:7150/api/Auth/Login
-        http://localhost:7150/api/Auth/Logout
-        http://localhost:7150/api/Auth/Delete/{id}
-     */
 
     [Route("api/Auth")]
     [ApiController]
@@ -37,11 +17,7 @@ namespace TRAFFIK_API.Auth
             _context = context;
         }
 
-        /// <summary>
-        /// Registers a new user account.
-        /// </summary>
-        /// <param name="dto">User registration data.</param>
-        /// <returns>Success message if registration is successful.</returns>
+
         [HttpPost("Register")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -52,8 +28,6 @@ namespace TRAFFIK_API.Auth
                 return BadRequest("Email already in use.");
             }
 
-            //Simple hashing for now
-            // var passwordHash = ComputeSha256Hash(dto.Password);
 
             var user = new User
             {

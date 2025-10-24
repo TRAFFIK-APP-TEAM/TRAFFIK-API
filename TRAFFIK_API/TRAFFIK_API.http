@@ -1,4 +1,4 @@
-@base = http://localhost:5027
+@base = http://localhost:7150
 @json = application/json
 
 ### Test basic endpoints

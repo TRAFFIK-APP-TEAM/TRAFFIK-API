@@ -1,12 +1,14 @@
-﻿namespace TRAFFIK_API.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace TRAFFIK_API.Models
 {
     public class InstagramPost
     {
-        public string Id { get; set; }
-        public string Caption { get; set; }
-        public string MediaUrl { get; set; }
-        public string MediaType { get; set; }
+        [Key]
+        public string Id { get; set; } = string.Empty;
+        public string Caption { get; set; } = string.Empty;
+        public string MediaUrl { get; set; } = string.Empty;
+        public string MediaType { get; set; } = string.Empty;
         public DateTime Timestamp { get; set; }
-
     }
 }

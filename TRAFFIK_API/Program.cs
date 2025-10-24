@@ -49,4 +49,11 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+// Seed service catalog data
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    await ServiceCatalogSeedData.SeedServicesAsync(context);
+}
+
 app.Run();

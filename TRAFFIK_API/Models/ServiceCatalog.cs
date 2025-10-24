@@ -25,7 +25,12 @@
         /// </summary>
         public decimal Price { get; set; } // e.g 79.99
 
-        
+        /// <summary>
+        /// The car type this service is associated with (optional).
+        /// </summary>
+        public int? CarTypeId { get; set; }
+        public VehicleType? CarType { get; set; }
+
         public ICollection<Booking> Bookings { get; set; } = new List<Booking>();
         public ICollection<CarModelService> CarModelServices { get; set; } = new List<CarModelService>();
         public ICollection<CarTypeServices> CarTypeServices { get; set; } = new List<CarTypeServices>();

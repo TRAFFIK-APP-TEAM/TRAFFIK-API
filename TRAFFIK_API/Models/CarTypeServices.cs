@@ -2,10 +2,10 @@
 {
     public class CarTypeServices
     {
-        public string VehicleTypeId { get; set; }
-        public Vehicle VehicleType { get; set; }
+        public int CarTypeId { get; set; }
+        public VehicleType CarType { get; set; } = null!;
 
         public int ServiceCatalogId { get; set; }
-        public ServiceCatalog ServiceCatalog { get; set; }
+        public ServiceCatalog ServiceCatalog { get; set; } = null!;
     }
 }

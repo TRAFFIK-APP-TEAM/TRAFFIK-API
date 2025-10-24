@@ -4,8 +4,8 @@
     {
         public int Id { get; set; }
 
-        public string VehicleLicensePlate { get; set; } 
-        public Vehicle Vehicle { get; set; } 
+        public int CarModelId { get; set; }
+        public CarModel CarModel { get; set; } = null!; 
 
         public int ServiceCatalogId { get; set; }
         public ServiceCatalog ServiceCatalog { get; set; }

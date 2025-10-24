@@ -133,7 +133,7 @@ namespace TRAFFIK_API.Controllers
             var vehicleType = vehicle.VehicleType;
 
             var query = _context.CarTypeServices
-                .Where(cts => cts.VehicleTypeId == vehicleType)
+                .Where(cts => cts.CarType.Type == vehicleType)
                 .Select(cts => cts.ServiceCatalog)
                 .Distinct();
 
@@ -160,7 +160,7 @@ namespace TRAFFIK_API.Controllers
         public async Task<ActionResult<IEnumerable<ServiceCatalog>>> GetServicesByCarType(string vehicleTypeId, string? sortBy = "name", string? direction = "asc")
         {
             var query = _context.CarTypeServices
-                .Where(vt => vt.VehicleTypeId == vehicleTypeId)
+                .Where(vt => vt.CarType.Type == vehicleTypeId)
                 .Select(vt => vt.ServiceCatalog)
                 .Distinct();
 

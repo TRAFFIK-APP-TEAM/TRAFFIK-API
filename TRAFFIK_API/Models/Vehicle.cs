@@ -37,13 +37,18 @@ namespace TRAFFIK_API.Models
         public string ImageURL { get; set; }
 
         /// <summary>
+        /// The color of the vehicle.
+        /// </summary>
+        public string Color { get; set; }
+
+        /// <summary>
         /// The manufacturing year of the vehicle.
         /// </summary>
         public int Year { get; set; }
         public string VehicleType { get; set; }
         //public VehicleTpye VehicleType { get; set; }
 
-        public User User { get; set; }
+        public User? User { get; set; }
        
         public ICollection<Booking> Bookings { get; set; } = new List<Booking>();
         public ICollection<CarModelService> CarModelServices { get; set; } = new List<CarModelService>();

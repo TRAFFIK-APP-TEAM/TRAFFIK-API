@@ -28,11 +28,11 @@ namespace TRAFFIK_API.Controllers
             return await _context.CarTypeServices.ToListAsync();
         }
 
-        // GET: api/CarTypeServices/{vehicleTypeId}/{serviceCatalogId}
-        [HttpGet("{vehicleTypeId:int}/{serviceCatalogId:int}")]
-        public async Task<ActionResult<CarTypeServices>> GetCarTypeServices(string vehicleTypeId, int serviceCatalogId)
+        // GET: api/CarTypeServices/{carTypeId}/{serviceCatalogId}
+        [HttpGet("{carTypeId:int}/{serviceCatalogId:int}")]
+        public async Task<ActionResult<CarTypeServices>> GetCarTypeServices(int carTypeId, int serviceCatalogId)
         {
-            var carTypeServices = await _context.CarTypeServices.FindAsync(vehicleTypeId, serviceCatalogId);
+            var carTypeServices = await _context.CarTypeServices.FindAsync(carTypeId, serviceCatalogId);
 
             if (carTypeServices == null)
             {
@@ -42,12 +42,12 @@ namespace TRAFFIK_API.Controllers
             return carTypeServices;
         }
 
-        // PUT: api/CarTypeServices/{vehicleTypeId}/{serviceCatalogId}
+        // PUT: api/CarTypeServices/{carTypeId}/{serviceCatalogId}
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{vehicleId:int}/{serviceCatalogId:int}")]
-        public async Task<IActionResult> PutCarTypeServices(string vehicleTypeId, int serviceCatalogId, CarTypeServices carTypeServices)
+        [HttpPut("{carTypeId:int}/{serviceCatalogId:int}")]
+        public async Task<IActionResult> PutCarTypeServices(int carTypeId, int serviceCatalogId, CarTypeServices carTypeServices)
         {
-            if (vehicleTypeId != carTypeServices.VehicleTypeId || serviceCatalogId != carTypeServices.ServiceCatalogId)
+            if (carTypeId != carTypeServices.CarTypeId || serviceCatalogId != carTypeServices.ServiceCatalogId)
             {
                 return BadRequest();
             }
@@ -60,7 +60,7 @@ namespace TRAFFIK_API.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!CarTypeServicesExists(vehicleTypeId, serviceCatalogId))
+                if (!CarTypeServicesExists(carTypeId, serviceCatalogId))
                 {
                     return NotFound();
                 }
@@ -85,7 +85,7 @@ namespace TRAFFIK_API.Controllers
             }
             catch (DbUpdateException)
             {
-                if (CarTypeServicesExists(carTypeServices.VehicleTypeId, carTypeServices.ServiceCatalogId))
+                if (CarTypeServicesExists(carTypeServices.CarTypeId, carTypeServices.ServiceCatalogId))
                 {
                     return Conflict();
                 }
@@ -95,14 +95,14 @@ namespace TRAFFIK_API.Controllers
                 }
             }
 
-            return CreatedAtAction(nameof(GetCarTypeServices), new { vehicleTypeId = carTypeServices.VehicleTypeId, serviceCatalogId = carTypeServices.ServiceCatalogId }, carTypeServices);
+            return CreatedAtAction(nameof(GetCarTypeServices), new { carTypeId = carTypeServices.CarTypeId, serviceCatalogId = carTypeServices.ServiceCatalogId }, carTypeServices);
         }
 
-        // DELETE: api/CarTypeServices/{vehicleTypeId}/{serviceCatalogId}
-        [HttpDelete("{vehicleTypeId:int}/{serviceCatalog:int}")]
-        public async Task<IActionResult> DeleteCarTypeServices(string vehicleTypeId, int serviceCatalogId)
+        // DELETE: api/CarTypeServices/{carTypeId}/{serviceCatalogId}
+        [HttpDelete("{carTypeId:int}/{serviceCatalogId:int}")]
+        public async Task<IActionResult> DeleteCarTypeServices(int carTypeId, int serviceCatalogId)
         {
-            var carTypeServices = await _context.CarTypeServices.FindAsync(vehicleTypeId, serviceCatalogId);
+            var carTypeServices = await _context.CarTypeServices.FindAsync(carTypeId, serviceCatalogId);
             if (carTypeServices == null)
             {
                 return NotFound();
@@ -114,9 +114,9 @@ namespace TRAFFIK_API.Controllers
             return NoContent();
         }
 
-        private bool CarTypeServicesExists(string vehicleTypeId, int serviceCatalogId)
+        private bool CarTypeServicesExists(int carTypeId, int serviceCatalogId)
         {
-            return _context.CarTypeServices.Any(e => e.VehicleTypeId == vehicleTypeId && e.ServiceCatalogId == serviceCatalogId);
+            return _context.CarTypeServices.Any(e => e.CarTypeId == carTypeId && e.ServiceCatalogId == serviceCatalogId);
         }
     }
 }

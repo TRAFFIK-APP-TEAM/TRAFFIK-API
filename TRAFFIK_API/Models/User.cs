@@ -53,7 +53,7 @@ namespace TRAFFIK_API.Models
         public bool IsActive { get; set; }
 
        
-        public ICollection<Vehicle> Cars { get; set; } = new List<Vehicle>();
+        public ICollection<CarModel> Cars { get; set; } = new List<CarModel>();
         public ICollection<Booking> Bookings { get; set; } = new List<Booking>();
         public ICollection<Notifications> Notifications { get; set; } = new List<Notifications>();
         public ICollection<Reward> Rewards { get; set; } = new List<Reward>();
