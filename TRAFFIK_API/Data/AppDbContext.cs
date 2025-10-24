@@ -22,11 +22,13 @@ namespace TRAFFIK_API.Data
         public DbSet<UserRole> UserRoles { get; set; } = default!;
         public DbSet<Review> Reviews { get; set; } = default!;
         public DbSet<Reward> Rewards { get; set; } = default!;
+        public DbSet<RewardItem> RewardItems { get; set; }
         public DbSet<ServiceHistory> ServiceHistories { get; set; } = default!;
         public DbSet<CarTypeServices> CarTypeServices { get; set; } = default!;
-        public DbSet<InstagramPost> InstagramPosts { get; set; } = default!;
 
-        // Override OnModelCreating if you need to configure relationships, keys, etc.
+        public DbSet<RewardRedemption> RewardRedemptions { get; set; }
+        public DbSet<VehicleType> VehicleTypes { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -57,10 +59,11 @@ namespace TRAFFIK_API.Data
                 .WithMany(sc => sc.CarTypeServices)
                 .HasForeignKey(cts => cts.ServiceCatalogId);
 
-            modelBuilder.Entity<CarModel>()
-                .HasOne(cm => cm.User)
-                .WithMany(u => u.Cars)
-                .HasForeignKey(cm => cm.UserId);
+            modelBuilder.Entity<RewardRedemption>()
+                .HasOne<RewardItem>()
+                .WithMany()
+                .HasForeignKey(r => r.ItemId);
+
 
             modelBuilder.Entity<CarModel>()
                 .HasOne(cm => cm.CarType)

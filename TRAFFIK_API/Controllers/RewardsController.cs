@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TRAFFIK_API.Data;
 using TRAFFIK_API.Models;
+using TRAFFIK_API.Models.Dtos;
 
 namespace TRAFFIK_API.Controllers
 {
@@ -145,40 +146,34 @@ namespace TRAFFIK_API.Controllers
             return Ok(balance);
         }
 
-        public class EarnRewardRequest
-        {
-            public int UserId { get; set; }
-            public int Points { get; set; }
-            public string Type { get; set; }
-        }
-
         // POST: api/Reward/earn
         /// Adds reward points for a user.
         [HttpPost("earn")]
-        [ProducesResponseType(StatusCodes.Status201Created)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<Reward>> Earn(EarnRewardRequest request)
         {
-            if (request.Points <= 0)
-                return BadRequest("Points must be positive");
+            if (request.AmountSpent <= 0)
+                return BadRequest("Amount must be positive");
+
+            // Example: 1 point per R10 spent
+            int pointsEarned = (int)(request.AmountSpent / 10);
+
+            if (pointsEarned <= 0)
+                return BadRequest("Amount too low to earn points");
 
             var reward = new Reward
             {
                 UserId = request.UserId,
-                Points = request.Points,
-                Type = request.Type,
+                Points = pointsEarned,
+                Type = "Booking",
                 Redeemed = false
             };
+
             _context.Rewards.Add(reward);
             await _context.SaveChangesAsync();
+
             return CreatedAtAction(nameof(GetReward), new { id = reward.Id }, reward);
         }
 
-        public class RedeemRewardRequest
-        {
-            public int UserId { get; set; }
-            public int Points { get; set; }
-        }
 
         // POST: api/Reward/redeem
         /// <summary>
