@@ -107,11 +107,11 @@ using (var scope = app.Services.CreateScope())
                 END IF;
             END $$;
         ");
-        Console.WriteLine("✅ Database schema updated: Added missing tables and columns");
+        Console.WriteLine("Database schema updated: Added missing tables and columns");
     }
     catch (Exception ex)
     {
-        Console.WriteLine($"⚠️ Warning: Could not update database schema: {ex.Message}");
+        Console.WriteLine($"Warning: Could not update database schema: {ex.Message}");
     }
     
     await ServiceCatalogSeedData.SeedServicesAsync(context);
