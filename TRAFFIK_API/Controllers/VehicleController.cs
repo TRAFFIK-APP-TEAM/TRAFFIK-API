@@ -58,19 +58,31 @@ namespace TRAFFIK_API.Controllers
         /// Updates an existing Vehicle.
         /// </summary>
         /// <param name="licensePlate">The license plate of vehicle to update.</param>
-        /// <param name="vehicle">The updated vehicle object.</param>
+        /// <param name="vehicleDto">The updated vehicle DTO.</param>
         [HttpPut("{licensePlate}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> PutVehicle(string licensePlate, Vehicle vehicle)
+        public async Task<IActionResult> PutVehicle(string licensePlate, VehicleUpdateDto vehicleDto)
         {
-            if (licensePlate != vehicle.LicensePlate)
+            if (licensePlate != vehicleDto.LicensePlate)
             {
-                return BadRequest();
+                return BadRequest("License plate mismatch");
             }
 
-            _context.Entry(vehicle).State = EntityState.Modified;
+            var vehicle = await _context.Vehicles.FindAsync(licensePlate);
+            if (vehicle == null)
+            {
+                return NotFound();
+            }
+
+            // Update vehicle properties
+            vehicle.Make = vehicleDto.Make;
+            vehicle.Model = vehicleDto.Model;
+            vehicle.ImageUrl = vehicleDto.ImageUrl;
+            vehicle.VehicleType = vehicleDto.VehicleType;
+            vehicle.Color = vehicleDto.Color;
+            vehicle.Year = vehicleDto.Year;
 
             try
             {

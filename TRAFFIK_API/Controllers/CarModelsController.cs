@@ -86,7 +86,7 @@ namespace TRAFFIK_API.Controllers
         public async Task<ActionResult<CarModelDto>> CreateOrGetCarModel(CarModelCreateRequest request)
         {
             var existingCarModel = await _context.CarModels
-                .Include(cm => cm.CarType)
+                .Include(cm => cm.VehicleType)
                 .FirstOrDefaultAsync(cm =>
                     cm.UserId == request.UserId &&
                     cm.Make == request.Make &&
@@ -112,7 +112,7 @@ namespace TRAFFIK_API.Controllers
                 carModel = new CarModel
                 {
                     UserId = request.UserId,
-                    CarTypeId = carType.Id,
+                    VehicleTypeId = carType.Id,
                     Make = request.Make,
                     Model = request.Model,
                     PlateNumber = request.PlateNumber,
@@ -127,7 +127,7 @@ namespace TRAFFIK_API.Controllers
             {
                 Id = carModel.Id,
                 UserId = carModel.UserId,
-                VehicleType = carModel.CarType?.Type ?? request.VehicleType,
+                VehicleType = carModel.VehicleType?.Type ?? request.VehicleType,
                 Make = carModel.Make,
                 Model = carModel.Model,
                 PlateNumber = carModel.PlateNumber,

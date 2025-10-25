@@ -10,7 +10,7 @@ using TRAFFIK_API.Models;
 
 namespace TRAFFIK_API.Controllers
 {
-    [Route("api/ServiceCatalog")]
+    [Route("api/ServiceCatalogs")]
     [ApiController]
     public class ServiceCatalogsController : ControllerBase
     {
@@ -133,7 +133,7 @@ namespace TRAFFIK_API.Controllers
             var vehicleType = vehicle.VehicleType;
 
             var query = _context.CarTypeServices
-                .Where(cts => cts.CarType.Type == vehicleType)
+                .Where(cts => cts.VehicleType.Type == vehicleType)
                 .Select(cts => cts.ServiceCatalog)
                 .Distinct();
 
@@ -160,7 +160,7 @@ namespace TRAFFIK_API.Controllers
         public async Task<ActionResult<IEnumerable<ServiceCatalog>>> GetServicesByCarType(string vehicleTypeId, string? sortBy = "name", string? direction = "asc")
         {
             var query = _context.CarTypeServices
-                .Where(vt => vt.CarType.Type == vehicleTypeId)
+                .Where(vt => vt.VehicleType.Type == vehicleTypeId)
                 .Select(vt => vt.ServiceCatalog)
                 .Distinct();
 

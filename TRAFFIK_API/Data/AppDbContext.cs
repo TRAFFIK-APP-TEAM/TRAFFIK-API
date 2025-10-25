@@ -46,12 +46,12 @@ namespace TRAFFIK_API.Data
                 .HasForeignKey(cms => cms.ServiceCatalogId);
 
             modelBuilder.Entity<CarTypeServices>()
-            .HasKey(cts => new { cts.CarTypeId, cts.ServiceCatalogId });
+            .HasKey(cts => new { cts.VehicleTypeId, cts.ServiceCatalogId });
 
             modelBuilder.Entity<CarTypeServices>()
-                .HasOne(cts => cts.CarType)
+                .HasOne(cts => cts.VehicleType)
                 .WithMany(ct => ct.CarTypeServices)
-                .HasForeignKey(cts => cts.CarTypeId);
+                .HasForeignKey(cts => cts.VehicleTypeId);
 
             modelBuilder.Entity<CarTypeServices>()
                 .HasOne(cts => cts.ServiceCatalog)
@@ -71,9 +71,9 @@ namespace TRAFFIK_API.Data
 
 
             modelBuilder.Entity<CarModel>()
-                .HasOne(cm => cm.CarType)
+                .HasOne(cm => cm.VehicleType)
                 .WithMany(ct => ct.CarModels)
-                .HasForeignKey(cm => cm.CarTypeId);
+                .HasForeignKey(cm => cm.VehicleTypeId);
 
             modelBuilder.Entity<BookingStages>()
             .HasOne(bs => bs.Booking)
@@ -153,9 +153,9 @@ namespace TRAFFIK_API.Data
 
             // ServiceCatalog relationships
             modelBuilder.Entity<ServiceCatalog>()
-                .HasOne(sc => sc.CarType)
+                .HasOne(sc => sc.VehicleType)
                 .WithMany(ct => ct.Services)
-                .HasForeignKey(sc => sc.CarTypeId);
+                .HasForeignKey(sc => sc.VehicleTypeId);
 
         }
     }

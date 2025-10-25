@@ -47,7 +47,7 @@ namespace TRAFFIK_API.Controllers
         [HttpPut("{carTypeId:int}/{serviceCatalogId:int}")]
         public async Task<IActionResult> PutCarTypeServices(int carTypeId, int serviceCatalogId, CarTypeServices carTypeServices)
         {
-            if (carTypeId != carTypeServices.CarTypeId || serviceCatalogId != carTypeServices.ServiceCatalogId)
+            if (carTypeId != carTypeServices.VehicleTypeId || serviceCatalogId != carTypeServices.ServiceCatalogId)
             {
                 return BadRequest();
             }
@@ -85,7 +85,7 @@ namespace TRAFFIK_API.Controllers
             }
             catch (DbUpdateException)
             {
-                if (CarTypeServicesExists(carTypeServices.CarTypeId, carTypeServices.ServiceCatalogId))
+                if (CarTypeServicesExists(carTypeServices.VehicleTypeId, carTypeServices.ServiceCatalogId))
                 {
                     return Conflict();
                 }
@@ -95,7 +95,7 @@ namespace TRAFFIK_API.Controllers
                 }
             }
 
-            return CreatedAtAction(nameof(GetCarTypeServices), new { carTypeId = carTypeServices.CarTypeId, serviceCatalogId = carTypeServices.ServiceCatalogId }, carTypeServices);
+            return CreatedAtAction(nameof(GetCarTypeServices), new { carTypeId = carTypeServices.VehicleTypeId, serviceCatalogId = carTypeServices.ServiceCatalogId }, carTypeServices);
         }
 
         // DELETE: api/CarTypeServices/{carTypeId}/{serviceCatalogId}
@@ -116,7 +116,7 @@ namespace TRAFFIK_API.Controllers
 
         private bool CarTypeServicesExists(int carTypeId, int serviceCatalogId)
         {
-            return _context.CarTypeServices.Any(e => e.CarTypeId == carTypeId && e.ServiceCatalogId == serviceCatalogId);
+            return _context.CarTypeServices.Any(e => e.VehicleTypeId == carTypeId && e.ServiceCatalogId == serviceCatalogId);
         }
     }
 }

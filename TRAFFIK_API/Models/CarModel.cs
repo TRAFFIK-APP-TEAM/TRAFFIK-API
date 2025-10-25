@@ -18,9 +18,9 @@ namespace TRAFFIK_API.Models
         public int UserId { get; set; }
 
         /// <summary>
-        /// The ID of the car type.
+        /// The ID of the vehicle type.
         /// </summary>
-        public int CarTypeId { get; set; }
+        public int VehicleTypeId { get; set; }
 
         /// <summary>
         /// The make of the car.
@@ -48,9 +48,9 @@ namespace TRAFFIK_API.Models
         public User User { get; set; } = null!;
 
         /// <summary>
-        /// Navigation property to the car type.
+        /// Navigation property to the vehicle type.
         /// </summary>
-        public VehicleType CarType { get; set; } = null!;
+        public VehicleType VehicleType { get; set; } = null!;
 
         /// <summary>
         /// Navigation property to bookings for this car.
