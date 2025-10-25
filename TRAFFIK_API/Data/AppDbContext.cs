@@ -63,6 +63,12 @@ namespace TRAFFIK_API.Data
                 .WithMany()
                 .HasForeignKey(r => r.ItemId);
 
+            // User to UserRole relationship
+            modelBuilder.Entity<User>()
+                .HasOne(u => u.Role)
+                .WithMany()
+                .HasForeignKey(u => u.RoleId);
+
 
             modelBuilder.Entity<CarModel>()
                 .HasOne(cm => cm.CarType)

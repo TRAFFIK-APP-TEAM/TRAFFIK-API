@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
 using TRAFFIK_API.Data;
+using TRAFFIK_API.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -104,14 +105,51 @@ using (var scope = app.Services.CreateScope())
                         FOREIGN KEY (""UserId"") REFERENCES ""Users""(""Id""),
                         FOREIGN KEY (""ItemId"") REFERENCES ""RewardItems""(""Id"")
                     );
-                END IF;
+                    END IF;
+                    
+                    -- Create UserRoles table if it doesn't exist
+                    IF NOT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'UserRoles') THEN
+                        CREATE TABLE ""UserRoles"" (
+                            ""Id"" SERIAL PRIMARY KEY,
+                            ""RoleName"" text NOT NULL
+                        );
+                    END IF;
+                    
+                    -- Fix Users table Id column to be auto-incrementing
+                    -- First, create a sequence for the Users table
+                    CREATE SEQUENCE IF NOT EXISTS ""Users_Id_seq"" START 1;
+                    
+                    -- Set the default value for the Id column to use the sequence
+                    ALTER TABLE ""Users"" ALTER COLUMN ""Id"" SET DEFAULT nextval('""Users_Id_seq""');
+                    
+                    -- Set the sequence to start from the next available ID
+                    SELECT setval('""Users_Id_seq""', COALESCE((SELECT MAX(""Id"") FROM ""Users""), 0) + 1, false);
             END $$;
         ");
-        Console.WriteLine("✅ Database schema updated: Added missing tables and columns");
+        Console.WriteLine("Database schema updated: Added missing tables and columns");
     }
     catch (Exception ex)
     {
-        Console.WriteLine($"⚠️ Warning: Could not update database schema: {ex.Message}");
+        Console.WriteLine($"Warning: Could not update database schema: {ex.Message}");
+    }
+    
+    // Seed UserRoles if they don't exist
+    try
+    {
+        if (!context.UserRoles.Any())
+        {
+            context.UserRoles.AddRange(new[]
+            {
+                new UserRole { Id = 1, RoleName = "Admin" },
+                new UserRole { Id = 2, RoleName = "Customer" },
+                new UserRole { Id = 3, RoleName = "Employee" }
+            });
+            await context.SaveChangesAsync();
+        }
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Warning: Could not seed UserRoles: {ex.Message}");
     }
     
     await ServiceCatalogSeedData.SeedServicesAsync(context);

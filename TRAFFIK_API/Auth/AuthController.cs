@@ -29,8 +29,13 @@ namespace TRAFFIK_API.Auth
             }
 
 
+            // Get the next available ID manually
+            var maxId = _context.Users.Max(u => (int?)u.Id) ?? 0;
+            var nextId = maxId + 1;
+
             var user = new User
             {
+                Id = nextId, // Use the next available ID
                 FullName = dto.FullName,
                 Email = dto.Email,
                 PhoneNumber = dto.PhoneNumber,
@@ -43,7 +48,14 @@ namespace TRAFFIK_API.Auth
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
 
-            return Ok("User registered successfully.");
+            return Ok(new
+            {
+                id = user.Id,
+                fullName = user.FullName,
+                email = user.Email,
+                phoneNumber = user.PhoneNumber,
+                roleId = user.RoleId
+            });
         }
 
         /// <summary>

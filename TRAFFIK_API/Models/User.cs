@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace TRAFFIK_API.Models
 {
@@ -11,6 +12,8 @@ namespace TRAFFIK_API.Models
         /// <summary>
         /// The unique identifier for the user.
         /// </summary>
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
 
         /// <summary>
@@ -53,6 +56,7 @@ namespace TRAFFIK_API.Models
         public bool IsActive { get; set; }
 
        
+        public UserRole? Role { get; set; }
         public ICollection<CarModel> Cars { get; set; } = new List<CarModel>();
         public ICollection<Booking> Bookings { get; set; } = new List<Booking>();
         public ICollection<Notifications> Notifications { get; set; } = new List<Notifications>();
