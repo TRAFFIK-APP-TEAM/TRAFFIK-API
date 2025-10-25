@@ -1,15 +1,20 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using TRAFFIK_API.Data;
+using TRAFFIK_API.DTOs;
 using TRAFFIK_API.Models;
 
 namespace TRAFFIK_API.Controllers
 {
+    public class BookingRequest
+    {
+        public Booking Booking { get; set; } = null!;
+    }
     [Route("api/Bookings")]
     [ApiController]
     public class BookingsController : ControllerBase
@@ -30,6 +35,33 @@ namespace TRAFFIK_API.Controllers
         public async Task<ActionResult<IEnumerable<Booking>>> GetBookings()
         {
             return await _context.Bookings.ToListAsync();
+        }
+
+        /// <summary>
+        /// Retrieves all bookings for a specific user.
+        /// </summary>
+        /// <param name="userId">The ID of the user.</param>
+        /// <returns>List of bookings for the user.</returns>
+        [HttpGet("User/{userId}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<ActionResult<IEnumerable<BookingDto>>> GetBookingsByUser(int userId)
+        {
+            var bookings = await _context.Bookings
+                .Where(b => b.UserId == userId)
+                .Select(b => new BookingDto
+                {
+                    Id = b.Id,
+                    UserId = b.UserId,
+                    CarModelId = b.CarModelId,
+                    ServiceCatalogId = b.ServiceCatalogId,
+                    BookingDate = b.BookingDate,
+                    BookingTime = b.BookingTime,
+                    Status = b.Status,
+                    VehicleLicensePlate = b.VehicleLicensePlate
+                })
+                .ToListAsync();
+
+            return bookings;
         }
 
         /// <summary>
@@ -93,18 +125,95 @@ namespace TRAFFIK_API.Controllers
         /// <summary>
         /// Creates a new booking.
         /// </summary>
-        /// <param name="booking">The booking object to create.</param>
+        /// <param name="request">The booking request containing the booking object.</param>
         /// <returns>The created booking.</returns>
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<Booking>> PostBooking(Booking booking)
+        public async Task<ActionResult<BookingDto>> PostBooking(BookingRequest request)
         {
+            var booking = request.Booking;
+
+            var user = await _context.Users.FindAsync(booking.UserId);
+            if (user == null)
+                return BadRequest("User not found");
+
+            var carModel = await _context.CarModels.FindAsync(booking.CarModelId);
+            if (carModel == null)
+                return BadRequest("CarModel not found");
+
+            // Load ServiceCatalog if provided
+            ServiceCatalog? serviceCatalog = null;
+            if (booking.ServiceCatalogId.HasValue)
+            {
+                serviceCatalog = await _context.ServiceCatalogs.FindAsync(booking.ServiceCatalogId.Value);
+            }
+
+            var newBooking = new Booking
+            {
+                UserId = booking.UserId,
+                CarModelId = booking.CarModelId,
+                ServiceCatalogId = booking.ServiceCatalogId,
+                BookingDate = booking.BookingDate,
+                BookingTime = booking.BookingTime,
+                Status = booking.Status,
+                VehicleLicensePlate = booking.VehicleLicensePlate
+            };
+
+            _context.Bookings.Add(newBooking);
+            await _context.SaveChangesAsync();
+
+            var dto = new BookingDto
+            {
+                Id = newBooking.Id,
+                UserId = newBooking.UserId,
+                CarModelId = newBooking.CarModelId,
+                ServiceCatalogId = newBooking.ServiceCatalogId,
+                BookingDate = newBooking.BookingDate,
+                BookingTime = newBooking.BookingTime,
+                Status = newBooking.Status,
+                VehicleLicensePlate = newBooking.VehicleLicensePlate
+            };
+
+            return CreatedAtAction("GetBooking", new { id = dto.Id }, dto);
+        }
+
+        [HttpPost("Confirm")]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status409Conflict)]
+        public async Task<ActionResult<BookingDto>> ConfirmBooking(BookingRequest request)
+        {
+            var booking = request.Booking;
+
+            var conflict = await _context.Bookings.AnyAsync(b =>
+                b.BookingDate == booking.BookingDate &&
+                b.BookingTime == booking.BookingTime &&
+                b.ServiceCatalogId == booking.ServiceCatalogId &&
+                b.CarModelId == booking.CarModelId);
+
+            if (conflict)
+                return Conflict("Time slot already booked");
+
+            booking.Status = "Pending";
+
             _context.Bookings.Add(booking);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetBooking", new { id = booking.Id }, booking);
+            var dto = new BookingDto
+            {
+                Id = booking.Id,
+                UserId = booking.UserId,
+                CarModelId = booking.CarModelId,
+                ServiceCatalogId = booking.ServiceCatalogId,
+                BookingDate = booking.BookingDate,
+                BookingTime = booking.BookingTime,
+                Status = booking.Status,
+                VehicleLicensePlate = booking.VehicleLicensePlate
+            };
+
+            return CreatedAtAction("GetBooking", new { id = dto.Id }, dto);
         }
+
 
         /// <summary>
         /// Deletes a booking by ID.
@@ -161,45 +270,5 @@ namespace TRAFFIK_API.Controllers
             return allSlots.Except(bookedTimes).ToList();
         }
 
-        /// <summary>
-        /// Confirms a booking after validating availability.
-        /// </summary>
-        /// <param name="booking">The booking object to confirm.</param>
-        /// <returns>The confirmed booking.</returns>
-        [HttpPost("Confirm")]
-        [ProducesResponseType(StatusCodes.Status201Created)]
-        [ProducesResponseType(StatusCodes.Status409Conflict)]
-        public async Task<ActionResult<Booking>> ConfirmBooking(Booking booking)
-        {
-            var conflict = await _context.Bookings.AnyAsync(b =>
-                b.BookingDate == booking.BookingDate &&
-                b.BookingTime == booking.BookingTime &&
-                b.ServiceId == booking.ServiceId &&
-                b.CarModelId == booking.CarModelId);
-
-            if (conflict)
-                return Conflict("Time slot already booked");
-
-            booking.Status = "Pending";
-            _context.Bookings.Add(booking);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetBooking", new { id = booking.Id }, booking);
-        }
-
-        /// <summary>
-        /// Retrieves bookings for a specific user.
-        /// </summary>
-        /// <param name="userId">The ID of the user.</param>
-        /// <returns>List of bookings for the user.</returns>
-        [HttpGet("User/{userId}")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<IEnumerable<Booking>>> GetUserBookings(int userId)
-        {
-            return await _context.Bookings
-                .Where(b => b.UserId == userId)
-                .OrderByDescending(b => b.BookingDate)
-                .ToListAsync();
-        }
     }
 }

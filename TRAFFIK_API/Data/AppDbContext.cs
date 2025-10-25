@@ -27,7 +27,6 @@ namespace TRAFFIK_API.Data
         public DbSet<CarTypeServices> CarTypeServices { get; set; } = default!;
 
         public DbSet<RewardRedemption> RewardRedemptions { get; set; }
-        public DbSet<VehicleType> VehicleTypes { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -60,7 +59,7 @@ namespace TRAFFIK_API.Data
                 .HasForeignKey(cts => cts.ServiceCatalogId);
 
             modelBuilder.Entity<RewardRedemption>()
-                .HasOne<RewardItem>()
+                .HasOne(r => r.Item)
                 .WithMany()
                 .HasForeignKey(r => r.ItemId);
 

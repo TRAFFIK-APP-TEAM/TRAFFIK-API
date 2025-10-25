@@ -9,7 +9,11 @@ namespace TRAFFIK_API.Models
         [Key]
         public int Id { get; set; }
 
-        [Column("type_name")]
-        public string TypeName { get; set; }
+        public string Type { get; set; } = string.Empty;
+
+        // Navigation properties
+        public ICollection<CarTypeServices> CarTypeServices { get; set; } = new List<CarTypeServices>();
+        public ICollection<CarModel> CarModels { get; set; } = new List<CarModel>();
+        public ICollection<ServiceCatalog> Services { get; set; } = new List<ServiceCatalog>();
     }
 }

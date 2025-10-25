@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using TRAFFIK_API.Data;
@@ -11,9 +12,11 @@ using TRAFFIK_API.Data;
 namespace TRAFFIK_API.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251025002723_AddVehicleModel")]
+    partial class AddVehicleModel
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -148,14 +151,9 @@ namespace TRAFFIK_API.Migrations
                     b.Property<int>("ServiceCatalogId")
                         .HasColumnType("integer");
 
-                    b.Property<string>("VehicleLicensePlate")
-                        .HasColumnType("text");
-
                     b.HasKey("CarModelId", "ServiceCatalogId");
 
                     b.HasIndex("ServiceCatalogId");
-
-                    b.HasIndex("VehicleLicensePlate");
 
                     b.ToTable("CarModelServices");
                 });
@@ -168,14 +166,9 @@ namespace TRAFFIK_API.Migrations
                     b.Property<int>("ServiceCatalogId")
                         .HasColumnType("integer");
 
-                    b.Property<string>("VehicleLicensePlate")
-                        .HasColumnType("text");
-
                     b.HasKey("CarTypeId", "ServiceCatalogId");
 
                     b.HasIndex("ServiceCatalogId");
-
-                    b.HasIndex("VehicleLicensePlate");
 
                     b.ToTable("CarTypeServices");
                 });
@@ -413,9 +406,6 @@ namespace TRAFFIK_API.Migrations
                     b.Property<int>("UserId")
                         .HasColumnType("integer");
 
-                    b.Property<string>("VehicleLicensePlate")
-                        .HasColumnType("text");
-
                     b.HasKey("Id");
 
                     b.HasIndex("CarModelId");
@@ -423,8 +413,6 @@ namespace TRAFFIK_API.Migrations
                     b.HasIndex("ServiceCatalogId");
 
                     b.HasIndex("UserId");
-
-                    b.HasIndex("VehicleLicensePlate");
 
                     b.ToTable("ServiceHistories");
                 });
@@ -487,33 +475,45 @@ namespace TRAFFIK_API.Migrations
             modelBuilder.Entity("TRAFFIK_API.Models.Vehicle", b =>
                 {
                     b.Property<string>("LicensePlate")
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasColumnName("LicensePlate");
 
                     b.Property<string>("Color")
-                        .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasColumnName("Color");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("CreatedAt")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
                     b.Property<string>("ImageUrl")
-                        .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasColumnName("ImageUrl");
 
                     b.Property<string>("Make")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasColumnName("Make");
 
                     b.Property<string>("Model")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasColumnName("Model");
 
                     b.Property<int>("UserId")
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("UserId");
 
                     b.Property<string>("VehicleType")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasColumnName("VehicleType");
 
-                    b.Property<int>("Year")
-                        .HasColumnType("integer");
+                    b.Property<int?>("Year")
+                        .HasColumnType("integer")
+                        .HasColumnName("Year");
 
                     b.HasKey("LicensePlate");
 
@@ -620,10 +620,6 @@ namespace TRAFFIK_API.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("TRAFFIK_API.Models.Vehicle", null)
-                        .WithMany("CarModelServices")
-                        .HasForeignKey("VehicleLicensePlate");
-
                     b.Navigation("CarModel");
 
                     b.Navigation("ServiceCatalog");
@@ -642,10 +638,6 @@ namespace TRAFFIK_API.Migrations
                         .HasForeignKey("ServiceCatalogId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.HasOne("TRAFFIK_API.Models.Vehicle", null)
-                        .WithMany("CarTypeServices")
-                        .HasForeignKey("VehicleLicensePlate");
 
                     b.Navigation("CarType");
 
@@ -750,10 +742,6 @@ namespace TRAFFIK_API.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("TRAFFIK_API.Models.Vehicle", null)
-                        .WithMany("ServiceHistories")
-                        .HasForeignKey("VehicleLicensePlate");
-
                     b.Navigation("CarModel");
 
                     b.Navigation("ServiceCatalog");
@@ -817,12 +805,6 @@ namespace TRAFFIK_API.Migrations
             modelBuilder.Entity("TRAFFIK_API.Models.Vehicle", b =>
                 {
                     b.Navigation("Bookings");
-
-                    b.Navigation("CarModelServices");
-
-                    b.Navigation("CarTypeServices");
-
-                    b.Navigation("ServiceHistories");
                 });
 
             modelBuilder.Entity("TRAFFIK_API.Models.VehicleType", b =>

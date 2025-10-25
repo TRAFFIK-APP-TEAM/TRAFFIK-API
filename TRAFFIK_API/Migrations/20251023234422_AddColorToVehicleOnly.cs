@@ -31,11 +31,10 @@ namespace TRAFFIK_API.Migrations
                 newName: "VehicleTypes");
 
             migrationBuilder.AddColumn<string>(
-                name: "Color",
-                table: "Vehicles",
+                name: "VehicleLicensePlate",
+                table: "Bookings",
                 type: "text",
-                nullable: false,
-                defaultValue: "");
+                nullable: true);
 
             migrationBuilder.AddPrimaryKey(
                 name: "PK_VehicleTypes",
@@ -86,8 +85,8 @@ namespace TRAFFIK_API.Migrations
                 table: "VehicleTypes");
 
             migrationBuilder.DropColumn(
-                name: "Color",
-                table: "Vehicles");
+                name: "VehicleLicensePlate",
+                table: "Bookings");
 
             migrationBuilder.RenameTable(
                 name: "VehicleTypes",

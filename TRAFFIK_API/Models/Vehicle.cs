@@ -34,15 +34,20 @@ namespace TRAFFIK_API.Models
         /// </summary>
         public string Model { get; set; } // e.g "GTR35"
 
-        public string ImageUrl { get; set; }
+        public string ImageUrl { get; set; } = string.Empty;
 
         /// <summary>
         /// The manufacturing year of the vehicle.
         /// </summary>
         public int Year { get; set; }
-        public string VehicleType { get; set; }
+        public string VehicleType { get; set; } = string.Empty;
         //public VehicleTpye VehicleType { get; set; }
-        public string Color { get; set; }
+        public string Color { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Navigation property to the user who owns this vehicle.
+        /// </summary>
+        public User User { get; set; } = null!;
 
         public ICollection<Booking> Bookings { get; set; } = new List<Booking>();
         public ICollection<CarModelService> CarModelServices { get; set; } = new List<CarModelService>();

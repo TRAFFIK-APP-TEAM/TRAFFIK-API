@@ -111,7 +111,7 @@ namespace TRAFFIK_API.Controllers
                 Make = vehicleDto.Make,
                 Model = vehicleDto.Model,
                 LicensePlate = vehicleDto.LicensePlate,
-                ImageURL = vehicleDto.ImageUrl,
+                ImageUrl = vehicleDto.ImageUrl,
                 VehicleType = vehicleDto.VehicleType,
                 Color = vehicleDto.Color,
                 Year = vehicleDto.Year,
@@ -179,8 +179,8 @@ namespace TRAFFIK_API.Controllers
         public async Task<ActionResult<IEnumerable<string>>> GetVehicleTypes()
         {
             var types = await _context.VehicleTypes
-                .OrderBy(v => v.TypeName)
-                .Select(v => v.TypeName)
+                .OrderBy(v => v.Type)
+                .Select(v => v.Type)
                 .ToListAsync();
 
             return Ok(types);
