@@ -12,8 +12,7 @@ namespace TRAFFIK_API.Models
         public string Type { get; set; } = string.Empty;
 
         // Navigation properties
-        public ICollection<CarTypeServices> CarTypeServices { get; set; } = new List<CarTypeServices>();
-        public ICollection<CarModel> CarModels { get; set; } = new List<CarModel>();
+        public ICollection<Vehicle> Vehicles { get; set; } = new List<Vehicle>();
         public ICollection<ServiceCatalog> Services { get; set; } = new List<ServiceCatalog>();
     }
 }

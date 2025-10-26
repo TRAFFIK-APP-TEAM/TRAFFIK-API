@@ -20,7 +20,7 @@ namespace TRAFFIK_API.DTOs
         public string ImageUrl { get; set; } = string.Empty;
 
         [Required]
-        public string VehicleType { get; set; } = string.Empty;
+        public int VehicleTypeId { get; set; }
 
         public string Color { get; set; } = string.Empty;
 

@@ -2,7 +2,7 @@
 {
     public class ServiceHistoryDto
     {
-        public int CarModelId { get; set; }
+        public string VehicleLicensePlate { get; set; } = string.Empty;
         public int ServiceCatalogId { get; set; }
         public int UserId { get; set; }
 

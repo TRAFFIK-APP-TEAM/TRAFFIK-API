@@ -22,12 +22,23 @@ namespace TRAFFIK_API.Controllers
         }
 
         // GET: api/ServiceCatalogs
-        /// Retrieves all service catalog entries.
+        /// <summary>
+        /// Retrieves all service catalog entries, optionally filtered by vehicle type.
+        /// </summary>
+        /// <param name="vehicleTypeId">Optional vehicle type ID to filter services.</param>
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<IEnumerable<ServiceCatalog>>> GetServiceCatalogs()
+        public async Task<ActionResult<IEnumerable<ServiceCatalog>>> GetServiceCatalogs(int? vehicleTypeId = null)
         {
-            return await _context.ServiceCatalogs.ToListAsync();
+            var query = _context.ServiceCatalogs.AsQueryable();
+            
+            if (vehicleTypeId.HasValue)
+            {
+                // Show services for this vehicle type OR generic services (null vehicle type)
+                query = query.Where(sc => sc.VehicleTypeId == vehicleTypeId.Value || sc.VehicleTypeId == null);
+            }
+            
+            return await query.Include(sc => sc.VehicleType).ToListAsync();
         }
 
         // GET: api/ServiceCatalogs/5
@@ -118,24 +129,27 @@ namespace TRAFFIK_API.Controllers
             return _context.ServiceCatalogs.Any(e => e.Id == id);
         }
 
-        // GET: api/ServiceCatalog/AvailableForVehicle/{carModelId}
-        [HttpGet("AvailableForVehicle/{carModelId}")]
+        /// <summary>
+        /// Retrieves available services for a specific vehicle by license plate.
+        /// </summary>
+        /// <param name="licensePlate">The license plate of the vehicle.</param>
+        /// <param name="sortBy">Sort by 'name' or 'price'. Default is 'name'.</param>
+        /// <param name="direction">Sort direction 'asc' or 'desc'. Default is 'asc'.</param>
+        [HttpGet("ForVehicle/{licensePlate}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<IEnumerable<ServiceCatalog>>> GetAvailableServices(string licensePlate, string? sortBy = "name", string? direction = "asc")
+        public async Task<ActionResult<IEnumerable<ServiceCatalog>>> GetServicesForVehicle(string licensePlate, string? sortBy = "name", string? direction = "asc")
         {
             var vehicle = await _context.Vehicles
+                .Include(v => v.VehicleType)
                 .FirstOrDefaultAsync(v => v.LicensePlate == licensePlate);
 
             if (vehicle == null)
                 return NotFound("Vehicle not found");
 
-            var vehicleType = vehicle.VehicleType;
-
-            var query = _context.CarTypeServices
-                .Where(cts => cts.VehicleType.Type == vehicleType)
-                .Select(cts => cts.ServiceCatalog)
-                .Distinct();
+            var query = _context.ServiceCatalogs
+                .Where(sc => sc.VehicleTypeId == vehicle.VehicleTypeId || sc.VehicleTypeId == null)
+                .Include(sc => sc.VehicleType);
 
             bool desc = string.Equals(direction, "desc", StringComparison.OrdinalIgnoreCase);
             if (string.Equals(sortBy, "price", StringComparison.OrdinalIgnoreCase))
@@ -151,18 +165,19 @@ namespace TRAFFIK_API.Controllers
             return Ok(services);
         }
 
-        // GET: api/ServiceCatalog/ByCarType/{carTypeId}
         /// <summary>
-        /// Retrieves available services for a specific car type id, sorted by price or name.
+        /// Retrieves available services for a specific vehicle type ID.
         /// </summary>
-        [HttpGet("ByCarType/{carTypeId}")]
+        /// <param name="vehicleTypeId">The ID of the vehicle type.</param>
+        /// <param name="sortBy">Sort by 'name' or 'price'. Default is 'name'.</param>
+        /// <param name="direction">Sort direction 'asc' or 'desc'. Default is 'asc'.</param>
+        [HttpGet("ByVehicleType/{vehicleTypeId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<IEnumerable<ServiceCatalog>>> GetServicesByCarType(string vehicleTypeId, string? sortBy = "name", string? direction = "asc")
+        public async Task<ActionResult<IEnumerable<ServiceCatalog>>> GetServicesByVehicleType(int vehicleTypeId, string? sortBy = "name", string? direction = "asc")
         {
-            var query = _context.CarTypeServices
-                .Where(vt => vt.VehicleType.Type == vehicleTypeId)
-                .Select(vt => vt.ServiceCatalog)
-                .Distinct();
+            var query = _context.ServiceCatalogs
+                .Where(sc => sc.VehicleTypeId == vehicleTypeId || sc.VehicleTypeId == null)
+                .Include(sc => sc.VehicleType);
 
             bool desc = string.Equals(direction, "desc", StringComparison.OrdinalIgnoreCase);
             if (string.Equals(sortBy, "price", StringComparison.OrdinalIgnoreCase))

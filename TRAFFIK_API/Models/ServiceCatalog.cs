@@ -13,27 +13,25 @@
         /// <summary>
         /// The name of the service.
         /// </summary>
-        public string Name { get; set; } // e.g "Oil Change"
+        public string Name { get; set; }
 
         /// <summary>
         /// A detailed description of the service.
         /// </summary>
-        public string Description { get; set; } // e.g "Complete oil change with premium oil"
+        public string Description { get; set; }
 
         /// <summary>
         /// The price of the service.
         /// </summary>
-        public decimal Price { get; set; } // e.g 79.99
+        public decimal Price { get; set; } // e.g 67
 
         /// <summary>
-        /// The vehicle type this service is associated with (optional).
+        /// The vehicle type this service is associated with.
         /// </summary>
         public int? VehicleTypeId { get; set; }
-        public VehicleType? VehicleType { get; set; }
 
+        public VehicleType? VehicleType { get; set; }
         public ICollection<Booking> Bookings { get; set; } = new List<Booking>();
-        public ICollection<CarModelService> CarModelServices { get; set; } = new List<CarModelService>();
-        public ICollection<CarTypeServices> CarTypeServices { get; set; } = new List<CarTypeServices>();
 
     }
 }
