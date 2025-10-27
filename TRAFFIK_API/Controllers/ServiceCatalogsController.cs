@@ -147,22 +147,21 @@ namespace TRAFFIK_API.Controllers
             if (vehicle == null)
                 return NotFound("Vehicle not found");
 
-            var query = _context.ServiceCatalogs
+            IQueryable<ServiceCatalog> baseQuery = _context.ServiceCatalogs
                 .Where(sc => sc.VehicleTypeId == vehicle.VehicleTypeId || sc.VehicleTypeId == null)
                 .Include(sc => sc.VehicleType);
 
             bool desc = string.Equals(direction, "desc", StringComparison.OrdinalIgnoreCase);
             if (string.Equals(sortBy, "price", StringComparison.OrdinalIgnoreCase))
             {
-                query = desc ? query.OrderByDescending(s => s.Price) : query.OrderBy(s => s.Price);
+                var services = desc ? await baseQuery.OrderByDescending(s => s.Price).ToListAsync() : await baseQuery.OrderBy(s => s.Price).ToListAsync();
+                return Ok(services);
             }
             else
             {
-                query = desc ? query.OrderByDescending(s => s.Name) : query.OrderBy(s => s.Name);
+                var services = desc ? await baseQuery.OrderByDescending(s => s.Name).ToListAsync() : await baseQuery.OrderBy(s => s.Name).ToListAsync();
+                return Ok(services);
             }
-
-            var services = await query.ToListAsync();
-            return Ok(services);
         }
 
         /// <summary>
@@ -175,22 +174,21 @@ namespace TRAFFIK_API.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<IEnumerable<ServiceCatalog>>> GetServicesByVehicleType(int vehicleTypeId, string? sortBy = "name", string? direction = "asc")
         {
-            var query = _context.ServiceCatalogs
+            IQueryable<ServiceCatalog> baseQuery = _context.ServiceCatalogs
                 .Where(sc => sc.VehicleTypeId == vehicleTypeId || sc.VehicleTypeId == null)
                 .Include(sc => sc.VehicleType);
 
             bool desc = string.Equals(direction, "desc", StringComparison.OrdinalIgnoreCase);
             if (string.Equals(sortBy, "price", StringComparison.OrdinalIgnoreCase))
             {
-                query = desc ? query.OrderByDescending(s => s.Price) : query.OrderBy(s => s.Price);
+                var services = desc ? await baseQuery.OrderByDescending(s => s.Price).ToListAsync() : await baseQuery.OrderBy(s => s.Price).ToListAsync();
+                return Ok(services);
             }
             else
             {
-                query = desc ? query.OrderByDescending(s => s.Name) : query.OrderBy(s => s.Name);
+                var services = desc ? await baseQuery.OrderByDescending(s => s.Name).ToListAsync() : await baseQuery.OrderBy(s => s.Name).ToListAsync();
+                return Ok(services);
             }
-
-            var services = await query.ToListAsync();
-            return Ok(services);
         }
     }
 }
