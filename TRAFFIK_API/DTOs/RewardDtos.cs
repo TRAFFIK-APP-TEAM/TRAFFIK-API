@@ -20,6 +20,8 @@
             public int Cost { get; set; }
             public DateTime RedeemedAt { get; set; }
             public bool Used { get; set; }
+            public string Code { get; set; } = string.Empty;
+            public int UserId { get; set; }
         }
 
 
@@ -28,5 +30,11 @@
             public int UserId { get; set; }
         }
 
+        public class RedemptionResponse
+        {
+            public int Redeemed { get; set; }
+            public int ItemId { get; set; }
+            public string Code { get; set; } = string.Empty;
+        }
 
 }
