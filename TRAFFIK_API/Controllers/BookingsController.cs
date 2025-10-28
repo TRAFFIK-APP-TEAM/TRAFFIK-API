@@ -47,6 +47,8 @@ namespace TRAFFIK_API.Controllers
         public async Task<ActionResult<IEnumerable<BookingDto>>> GetBookingsByUser(int userId)
         {
             var bookings = await _context.Bookings
+                .Include(b => b.ServiceCatalog)
+                .Include(b => b.Vehicle)
                 .Where(b => b.UserId == userId)
                 .Select(b => new BookingDto
                 {
@@ -56,7 +58,9 @@ namespace TRAFFIK_API.Controllers
                     BookingDate = b.BookingDate,
                     BookingTime = b.BookingTime,
                     Status = b.Status,
-                    VehicleLicensePlate = b.VehicleLicensePlate
+                    VehicleLicensePlate = b.VehicleLicensePlate,
+                    ServiceName = b.ServiceCatalog != null && !string.IsNullOrEmpty(b.ServiceCatalog.Name) ? b.ServiceCatalog.Name : "Service",
+                    VehicleDisplayName = b.Vehicle != null ? $"{b.Vehicle.Make ?? ""} {b.Vehicle.Model ?? ""}".Trim() : ""
                 })
                 .ToListAsync();
 
