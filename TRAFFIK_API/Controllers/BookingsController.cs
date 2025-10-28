@@ -52,7 +52,6 @@ namespace TRAFFIK_API.Controllers
                 {
                     Id = b.Id,
                     UserId = b.UserId,
-                    CarModelId = b.CarModelId,
                     ServiceCatalogId = b.ServiceCatalogId,
                     BookingDate = b.BookingDate,
                     BookingTime = b.BookingTime,
@@ -138,9 +137,13 @@ namespace TRAFFIK_API.Controllers
             if (user == null)
                 return BadRequest("User not found");
 
-            var carModel = await _context.CarModels.FindAsync(booking.CarModelId);
-            if (carModel == null)
-                return BadRequest("CarModel not found");
+            // Verify Vehicle exists if provided
+            if (!string.IsNullOrEmpty(booking.VehicleLicensePlate))
+            {
+                var vehicle = await _context.Vehicles.FindAsync(booking.VehicleLicensePlate);
+                if (vehicle == null)
+                    return BadRequest("Vehicle not found");
+            }
 
             // Load ServiceCatalog if provided
             ServiceCatalog? serviceCatalog = null;
@@ -152,7 +155,6 @@ namespace TRAFFIK_API.Controllers
             var newBooking = new Booking
             {
                 UserId = booking.UserId,
-                CarModelId = booking.CarModelId,
                 ServiceCatalogId = booking.ServiceCatalogId,
                 BookingDate = booking.BookingDate,
                 BookingTime = booking.BookingTime,
@@ -167,7 +169,6 @@ namespace TRAFFIK_API.Controllers
             {
                 Id = newBooking.Id,
                 UserId = newBooking.UserId,
-                CarModelId = newBooking.CarModelId,
                 ServiceCatalogId = newBooking.ServiceCatalogId,
                 BookingDate = newBooking.BookingDate,
                 BookingTime = newBooking.BookingTime,
@@ -189,7 +190,7 @@ namespace TRAFFIK_API.Controllers
                 b.BookingDate == booking.BookingDate &&
                 b.BookingTime == booking.BookingTime &&
                 b.ServiceCatalogId == booking.ServiceCatalogId &&
-                b.CarModelId == booking.CarModelId);
+                b.VehicleLicensePlate == booking.VehicleLicensePlate);
 
             if (conflict)
                 return Conflict("Time slot already booked");
@@ -203,7 +204,6 @@ namespace TRAFFIK_API.Controllers
             {
                 Id = booking.Id,
                 UserId = booking.UserId,
-                CarModelId = booking.CarModelId,
                 ServiceCatalogId = booking.ServiceCatalogId,
                 BookingDate = booking.BookingDate,
                 BookingTime = booking.BookingTime,
@@ -250,10 +250,10 @@ namespace TRAFFIK_API.Controllers
         /// <returns>List of available time slots.</returns>
         [HttpGet("AvailableSlots")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<IEnumerable<TimeOnly>>> GetAvailableSlots(int serviceId, DateOnly date)
+        public async Task<ActionResult<IEnumerable<TimeOnly>>> GetAvailableSlots(int serviceCatalogId, DateOnly date)
         {
             var bookedTimes = await _context.Bookings
-                .Where(b => b.ServiceId == serviceId && b.BookingDate == date)
+                .Where(b => b.ServiceCatalogId == serviceCatalogId && b.BookingDate == date)
                 .Select(b => b.BookingTime)
                 .ToListAsync();
 

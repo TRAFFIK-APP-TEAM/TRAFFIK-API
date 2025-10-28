@@ -40,20 +40,26 @@ namespace TRAFFIK_API.Models
         /// The manufacturing year of the vehicle.
         /// </summary>
         public int Year { get; set; }
-        public string VehicleType { get; set; } = string.Empty;
-        //public VehicleTpye VehicleType { get; set; }
+        
+        /// <summary>
+        /// The ID of the vehicle type.
+        /// </summary>
+        public int VehicleTypeId { get; set; }
+        
         public string Color { get; set; } = string.Empty;
 
         /// <summary>
         /// Navigation property to the user who owns this vehicle.
         /// </summary>
         public User User { get; set; } = null!;
+        
+        /// <summary>
+        /// Navigation property to the vehicle type.
+        /// </summary>
+        public VehicleType VehicleType { get; set; } = null!;
 
         public ICollection<Booking> Bookings { get; set; } = new List<Booking>();
-        public ICollection<CarModelService> CarModelServices { get; set; } = new List<CarModelService>();
         public ICollection<ServiceHistory> ServiceHistories { get; set; } = new List<ServiceHistory>();
-        public ICollection<CarTypeServices> CarTypeServices { get; set; } = new List<CarTypeServices>();
-        //public ICollection<ServiceCatalog>Services { get; set; } = new List<ServiceCatalog>();
 
     }
 }

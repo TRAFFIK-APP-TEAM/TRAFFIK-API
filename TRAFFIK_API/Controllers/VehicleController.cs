@@ -76,11 +76,15 @@ namespace TRAFFIK_API.Controllers
                 return NotFound();
             }
 
+            // Check if vehicle type exists
+            var vehicleType = await _context.VehicleTypes.FindAsync(vehicleDto.VehicleTypeId);
+            if (vehicleType == null) return BadRequest("Vehicle type not found");
+
             // Update vehicle properties
             vehicle.Make = vehicleDto.Make;
             vehicle.Model = vehicleDto.Model;
             vehicle.ImageUrl = vehicleDto.ImageUrl;
-            vehicle.VehicleType = vehicleDto.VehicleType;
+            vehicle.VehicleTypeId = vehicleDto.VehicleTypeId;
             vehicle.Color = vehicleDto.Color;
             vehicle.Year = vehicleDto.Year;
 
@@ -116,6 +120,11 @@ namespace TRAFFIK_API.Controllers
             // Check if user exists
             var user = await _context.Users.FindAsync(vehicleDto.UserId);
             if (user == null) return BadRequest("User not found");
+            
+            // Check if vehicle type exists
+            var vehicleType = await _context.VehicleTypes.FindAsync(vehicleDto.VehicleTypeId);
+            if (vehicleType == null) return BadRequest("Vehicle type not found");
+            
             // Create vehicle entity from DTO
             var vehicle = new Vehicle
             {
@@ -124,7 +133,7 @@ namespace TRAFFIK_API.Controllers
                 Model = vehicleDto.Model,
                 LicensePlate = vehicleDto.LicensePlate,
                 ImageUrl = vehicleDto.ImageUrl,
-                VehicleType = vehicleDto.VehicleType,
+                VehicleTypeId = vehicleDto.VehicleTypeId,
                 Color = vehicleDto.Color,
                 Year = vehicleDto.Year,
                 User = user
@@ -188,11 +197,10 @@ namespace TRAFFIK_API.Controllers
         /// </summary>
         [HttpGet("Types")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<IEnumerable<string>>> GetVehicleTypes()
+        public async Task<ActionResult<IEnumerable<VehicleType>>> GetVehicleTypes()
         {
             var types = await _context.VehicleTypes
                 .OrderBy(v => v.Type)
-                .Select(v => v.Type)
                 .ToListAsync();
 
             return Ok(types);
