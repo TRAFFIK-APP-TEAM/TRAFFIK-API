@@ -32,16 +32,62 @@ namespace TRAFFIK_API.Controllers
         /// <returns>List of all bookings.</returns>
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<IEnumerable<Booking>>> GetBookings()
+        public async Task<ActionResult<IEnumerable<BookingDto>>> GetBookings()
         {
-            return await _context.Bookings.ToListAsync();
+            var bookings = await _context.Bookings
+                .Include(b => b.ServiceCatalog)
+                .Include(b => b.Vehicle)
+                .Select(b => new BookingDto
+                {
+                    Id = b.Id,
+                    UserId = b.UserId,
+                    ServiceCatalogId = b.ServiceCatalogId,
+                    BookingDate = b.BookingDate,
+                    BookingTime = b.BookingTime,
+                    Status = b.Status,
+                    VehicleLicensePlate = b.VehicleLicensePlate,
+                    ServiceName = b.ServiceCatalog != null && !string.IsNullOrEmpty(b.ServiceCatalog.Name) ? b.ServiceCatalog.Name : "Service",
+                    VehicleDisplayName = b.Vehicle != null ? $"{b.Vehicle.Make ?? ""} {b.Vehicle.Model ?? ""}".Trim() : ""
+                })
+                .ToListAsync();
+
+            return bookings;
+        }
+
+        /// <summary>
+        /// Retrieves all bookings for staff management.
+        /// </summary>
+        /// <returns>List of all bookings with full details.</returns>
+        [HttpGet("Staff")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<ActionResult<IEnumerable<BookingDto>>> GetStaffBookings()
+        {
+            var bookings = await _context.Bookings
+                .Include(b => b.ServiceCatalog)
+                .Include(b => b.Vehicle)
+                .Include(b => b.User)
+                .OrderByDescending(b => b.BookingDate)
+                .ThenByDescending(b => b.BookingTime)
+                .Select(b => new BookingDto
+                {
+                    Id = b.Id,
+                    UserId = b.UserId,
+                    ServiceCatalogId = b.ServiceCatalogId,
+                    BookingDate = b.BookingDate,
+                    BookingTime = b.BookingTime,
+                    Status = b.Status,
+                    VehicleLicensePlate = b.VehicleLicensePlate,
+                    ServiceName = b.ServiceCatalog != null && !string.IsNullOrEmpty(b.ServiceCatalog.Name) ? b.ServiceCatalog.Name : "Service",
+                    VehicleDisplayName = b.Vehicle != null ? $"{b.Vehicle.Make ?? ""} {b.Vehicle.Model ?? ""}".Trim() : ""
+                })
+                .ToListAsync();
+
+            return bookings;
         }
 
         /// <summary>
         /// Retrieves all bookings for a specific user.
         /// </summary>
-        /// <param name="userId">The ID of the user.</param>
-        /// <returns>List of bookings for the user.</returns>
         [HttpGet("User/{userId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<IEnumerable<BookingDto>>> GetBookingsByUser(int userId)
