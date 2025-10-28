@@ -38,16 +38,64 @@ namespace TRAFFIK_API.Controllers
                 Description = r.Item.Description,
                 Cost = r.Item.Cost,
                 RedeemedAt = r.RedeemedAt,
-                Used = r.Used
+                Used = r.Used,
+                Code = r.Code,
+                UserId = r.UserId
             });
 
             return Ok(result);
         }
 
+        // NEW ENDPOINT: Get all redeemed rewards (admin)
+        [HttpGet("redeemed/all")]
+        public async Task<ActionResult<List<RedeemedRewardDto>>> GetAllRedeemed()
+        {
+            var redeemedRewards = await _context.RewardRedemptions
+                .Include(r => r.Item)
+                .Select(r => new RedeemedRewardDto
+                {
+                    ItemId = r.ItemId,
+                    Name = r.Item.Name,
+                    Description = r.Item.Description,
+                    Cost = r.Item.Cost,
+                    RedeemedAt = r.RedeemedAt,
+                    Used = r.Used,
+                    Code = r.Code,
+                    UserId = r.UserId
+                })
+                .OrderByDescending(r => r.RedeemedAt)
+                .ToListAsync();
+
+            return Ok(redeemedRewards);
+        }
+
+        // NEW ENDPOINT: Mark redemption code as used
+        [HttpPut("redeemed/{code}/mark-used")]
+        public async Task<ActionResult> MarkAsUsedByCode(string code)
+        {
+            var redeemedReward = await _context.RewardRedemptions
+                .FirstOrDefaultAsync(r => r.Code == code);
+
+            if (redeemedReward == null)
+            {
+                return NotFound($"Redemption code '{code}' not found.");
+            }
+
+            if (redeemedReward.Used)
+            {
+                return BadRequest("Code has already been deactivated.");
+            }
+
+            redeemedReward.Used = true;
+            await _context.SaveChangesAsync();
+
+            return Ok(new { message = "Code deactivated successfully" });
+        }
+
 
 
         [HttpPost("redeem/{itemId}")]
-        public async Task<ActionResult> RedeemItem(int itemId, [FromBody] RedeemCatalogItemRequest request)
+        public async Task<ActionResult<RedemptionResponse>> RedeemItem(int itemId, [FromBody] RedeemCatalogItemRequest request)
         {
             var item = await _context.RewardItems.FindAsync(itemId);
             if (item == null) return NotFound();
@@ -87,16 +135,25 @@ namespace TRAFFIK_API.Controllers
                 }
             }
 
+            // Generate unique redemption code
+            var redemptionCode = GenerateRedemptionCode();
+
             _context.RewardRedemptions.Add(new RewardRedemption
             {
                 UserId = request.UserId,
                 ItemId = itemId,
+                Code = redemptionCode,
                 RedeemedAt = DateTime.UtcNow
             });
 
             await _context.SaveChangesAsync();
 
-            return Ok(new { redeemed = item.Cost, itemId });
+            return Ok(new RedemptionResponse
+            {
+                Redeemed = item.Cost,
+                ItemId = itemId,
+                Code = redemptionCode
+            });
         }
 
         [HttpPost("user/{userId}/redeemed/{itemId}/use")]
@@ -112,6 +169,25 @@ namespace TRAFFIK_API.Controllers
             await _context.SaveChangesAsync();
 
             return NoContent();
+        }
+
+        // Helper method to generate unique redemption code
+        private string GenerateRedemptionCode()
+        {
+            // Random alphanumeric (10 characters, readable)
+            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+            var random = new Random();
+            var code = new string(Enumerable.Repeat(chars, 10)
+                .Select(s => s[random.Next(s.Length)]).ToArray());
+            
+            // Check if code already exists (very unlikely but be safe)
+            var exists = _context.RewardRedemptions.Any(r => r.Code == code);
+            if (exists)
+            {
+                return GenerateRedemptionCode(); // Recursively generate until unique
+            }
+
+            return code;
         }
     }
 }

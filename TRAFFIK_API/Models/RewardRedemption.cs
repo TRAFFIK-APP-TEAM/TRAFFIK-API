@@ -21,6 +21,11 @@ namespace TRAFFIK_API.Models
         public int ItemId { get; set; }
 
         /// <summary>
+        /// The unique redemption code for this redemption.
+        /// </summary>
+        public string Code { get; set; } = string.Empty;
+
+        /// <summary>
         /// The date and time when the item was redeemed.
         /// </summary>
         public DateTime RedeemedAt { get; set; }

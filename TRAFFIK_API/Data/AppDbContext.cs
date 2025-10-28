@@ -39,6 +39,11 @@ namespace TRAFFIK_API.Data
                 .WithMany()
                 .HasForeignKey(r => r.UserId);
 
+            // RewardRedemption unique index on Code
+            modelBuilder.Entity<RewardRedemption>()
+                .HasIndex(r => r.Code)
+                .IsUnique();
+
             // User to UserRole relationship
             modelBuilder.Entity<User>()
                 .HasOne(u => u.Role)
