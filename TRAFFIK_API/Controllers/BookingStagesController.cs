@@ -159,25 +159,7 @@ namespace TRAFFIK_API.Controllers
                 .Include(bs => bs.UpdatedByUser)
                 .ToListAsync();
 
-            if (stages == null || stages.Count == 0)
-            {
-                // No stages found, return default "Pending" stage
-                return Ok(new List<BookingStageUpdateRequestDto> 
-                { 
-                    new BookingStageUpdateRequestDto
-                    {
-                        BookingId = bookingId,
-                        CurrentStage = "Pending",
-                        AvailableStages = new List<string> { "Started", "Inspection", "Completed", "Paid" },
-                        UpdatedAt = DateTime.UtcNow
-                    }
-                });
-            }
-
-            // Get the latest stage
-            var latestStage = stages.Last();
-            
-            // Get the booking to find vehicle ID
+            // Get the booking to find its current status
             var booking = await _context.Bookings
                 .Include(b => b.Vehicle)
                 .FirstOrDefaultAsync(b => b.Id == bookingId);
@@ -186,6 +168,32 @@ namespace TRAFFIK_API.Controllers
             {
                 return NotFound("Booking not found.");
             }
+
+            if (stages == null || stages.Count == 0)
+            {
+                // No stages found, determine the initial stage based on booking status
+                string initialStage = booking.Status switch
+                {
+                    "In Progress" => "Pending",  // New bookings with In Progress status start at Pending
+                    "Completed" => "Completed",
+                    "Closed" => "Paid",
+                    _ => "Pending"  // Default to Pending
+                };
+                
+                return Ok(new List<BookingStageUpdateRequestDto> 
+                { 
+                    new BookingStageUpdateRequestDto
+                    {
+                        BookingId = bookingId,
+                        CurrentStage = initialStage,
+                        AvailableStages = initialStage == "Pending" ? new List<string> { "Started", "Inspection", "Completed", "Paid" } : new List<string>(),
+                        UpdatedAt = DateTime.UtcNow
+                    }
+                });
+            }
+
+            // Get the latest stage
+            var latestStage = stages.Last();
 
             // Define stage sequence
             var stageSequence = new List<string> { "Pending", "Started", "Inspection", "Completed", "Paid" };
@@ -224,94 +232,76 @@ namespace TRAFFIK_API.Controllers
         }
 
         //POST /api/BookingStages/UpdateStage
-        // TODO: Re-enable authorization when JWT authentication is configured
-        // [Authorize(Roles = "Employee,Admin")]
+        //[Authorize(Roles = "Employee,Admin")] // Temporarily disabled for testing
         [HttpPost("UpdateStage")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> UpdateStage([FromBody] object rawRequest)
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> UpdateStage([FromBody] BookingStageUpdateRequestDto requestDto)
         {
             try
             {
-                // Debug logging
-                Console.WriteLine($"[UpdateStage] Received raw request: {rawRequest}");
-                
-                if (rawRequest == null)
+                if (!ModelState.IsValid || string.IsNullOrEmpty(requestDto.SelectedStage))
                 {
-                    Console.WriteLine("[UpdateStage] Request is null");
-                    return BadRequest("Request data is required.");
-                }
-                
-                // Manually deserialize to handle missing properties
-                dynamic requestJson = rawRequest;
-                int bookingId = 0;
-                string selectedStage = string.Empty;
-                
-                try
-                {
-                    bookingId = Convert.ToInt32(requestJson.BookingId);
-                    selectedStage = requestJson.SelectedStage?.ToString() ?? string.Empty;
-                    Console.WriteLine($"[UpdateStage] Parsed BookingId={bookingId}, SelectedStage={selectedStage}");
-                }
-                catch (Exception parseEx)
-                {
-                    Console.WriteLine($"[UpdateStage] Failed to parse request: {parseEx.Message}");
-                    return BadRequest("Invalid request format. Ensure BookingId and SelectedStage are provided.");
-                }
-                
-                if (string.IsNullOrEmpty(selectedStage))
-                {
-                    Console.WriteLine("[UpdateStage] SelectedStage is empty");
-                    return BadRequest("SelectedStage is required.");
+                    return BadRequest(new { error = "SelectedStage is required.", details = ModelState });
                 }
 
-                var booking = await _context.Bookings.FindAsync(bookingId);
+                var booking = await _context.Bookings.FindAsync(requestDto.BookingId);
                 if (booking == null)
-                {
-                    Console.WriteLine($"[UpdateStage] Booking not found: {bookingId}");
-                    return BadRequest("Invalid booking ID.");
-                }
+                    return BadRequest(new { error = "Invalid booking ID." });
 
-                // Get user ID - use fallback for now since JWT isn't configured
-                var staffUser = await _context.Users.FirstOrDefaultAsync(u => u.RoleId == 2 || u.RoleId == 1);
-                if (staffUser == null)
+                // Get user ID - try from claim first, then fallback to any staff user
+                int updatedByUserId;
+                var userIdClaim = User.FindFirst("UserId");
+                
+                if (userIdClaim != null && int.TryParse(userIdClaim.Value, out updatedByUserId))
                 {
-                    Console.WriteLine("[UpdateStage] No staff user found");
-                    return BadRequest("No staff user found in the database.");
+                    // Found user ID from claim
+                    var user = await _context.Users.FindAsync(updatedByUserId);
+                    if (user == null)
+                    {
+                        return BadRequest(new { error = "Invalid user ID from token." });
+                    }
                 }
-                var updatedByUserId = staffUser.Id;
-                Console.WriteLine($"[UpdateStage] Using staff user ID: {updatedByUserId}");
+                else
+                {
+                    // Fallback: get first staff user
+                    var staffUser = await _context.Users.FirstOrDefaultAsync(u => u.RoleId == 2 || u.RoleId == 1);
+                    if (staffUser == null)
+                        return BadRequest(new { error = "No staff user found in database." });
+                    updatedByUserId = staffUser.Id;
+                }
 
                 // Map stage name to status
-                var status = MapStageToStatus(selectedStage);
-                Console.WriteLine($"[UpdateStage] Mapped stage '{selectedStage}' to status '{status}'");
+                var status = MapStageToStatus(requestDto.SelectedStage);
 
                 var stage = new BookingStages
                 {
-                    BookingId = bookingId,
-                    StageName = selectedStage,
+                    BookingId = requestDto.BookingId,
+                    StageName = requestDto.SelectedStage,
                     Status = status,
                     TimeStamp = DateTime.UtcNow,
                     UpdatedByUserId = updatedByUserId
                 };
 
                 _context.BookingStages.Add(stage);
-                Console.WriteLine($"[UpdateStage] Added stage to context");
 
-                // Update booking status to match the stage
-                booking.Status = selectedStage;
+                // Update booking status to use the mapped status value
+                booking.Status = status;
                 _context.Entry(booking).State = EntityState.Modified;
 
                 await _context.SaveChangesAsync();
-                Console.WriteLine($"[UpdateStage] Saved changes successfully. New stage ID: {stage.Id}");
 
-                return Ok(new { message = "Booking stage updated successfully.", stageId = stage.Id });
+                return Ok(true);
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[UpdateStage] Exception occurred: {ex.Message}");
-                Console.WriteLine($"[UpdateStage] Stack trace: {ex.StackTrace}");
-                return StatusCode(500, new { error = "An error occurred while updating the booking stage.", details = ex.Message });
+                // Log the exception details for debugging
+                return StatusCode(500, new { 
+                    error = "An error occurred while updating the booking stage.",
+                    message = ex.Message,
+                    stackTrace = ex.StackTrace
+                });
             }
         }
 

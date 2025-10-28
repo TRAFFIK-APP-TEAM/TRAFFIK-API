@@ -28,21 +28,15 @@ namespace TRAFFIK_API.Auth
                 return BadRequest("Email already in use.");
             }
 
-
-            // Get the next available ID manually
-            var maxId = _context.Users.Max(u => (int?)u.Id) ?? 0;
-            var nextId = maxId + 1;
-
             var user = new User
             {
-                Id = nextId, // Use the next available ID
                 FullName = dto.FullName,
                 Email = dto.Email,
                 PhoneNumber = dto.PhoneNumber,
-                RoleId = dto.RoleId, // assign default role or from dto
+                RoleId = dto.RoleId,
                 CreatedAt = DateTime.UtcNow,
                 IsActive = true,
-                PasswordHash = HashPassword(dto.Password)  //dto.Password = Plain password user sends in
+                PasswordHash = HashPassword(dto.Password)
             };
 
             _context.Users.Add(user);
