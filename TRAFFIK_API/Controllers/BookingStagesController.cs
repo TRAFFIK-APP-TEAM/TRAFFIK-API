@@ -9,6 +9,7 @@ using TRAFFIK_API.Data;
 using TRAFFIK_API.Models;
 using TRAFFIK_API.DTOs;
 using Microsoft.AspNetCore.Authorization;
+using TRAFFIK_API.Models.Dtos;
 
 namespace TRAFFIK_API.Controllers
 {
@@ -284,11 +285,50 @@ namespace TRAFFIK_API.Controllers
                     UpdatedByUserId = updatedByUserId
                 };
 
+                // Check if booking has already reached "Paid" stage before adding the new stage
+                bool alreadyPaid = false;
+                if (requestDto.SelectedStage.ToLower() == "paid")
+                {
+                    alreadyPaid = await _context.BookingStages
+                        .Where(bs => bs.BookingId == booking.Id && bs.StageName.ToLower() == "paid")
+                        .AnyAsync();
+                }
+
                 _context.BookingStages.Add(stage);
 
                 // Update booking status to use the mapped status value
                 booking.Status = status;
                 _context.Entry(booking).State = EntityState.Modified;
+
+                // Award points when status reaches "Paid" (first time only)
+                if (requestDto.SelectedStage.ToLower() == "paid" && !alreadyPaid)
+                {
+                    // Load booking with service to get price
+                    await _context.Entry(booking)
+                        .Reference(b => b.ServiceCatalog)
+                        .LoadAsync();
+
+                    if (booking.ServiceCatalog != null)
+                    {
+                        decimal amountSpent = booking.ServiceCatalog.Price;
+                        
+                        // Calculate points: 1 point per R10 spent
+                        int pointsEarned = (int)(amountSpent / 10);
+
+                        if (pointsEarned > 0)
+                        {
+                            var reward = new Reward
+                            {
+                                UserId = booking.UserId,
+                                Points = pointsEarned,
+                                Type = $"Booking #{booking.Id}",
+                                Redeemed = false
+                            };
+
+                            _context.Rewards.Add(reward);
+                        }
+                    }
+                }
 
                 await _context.SaveChangesAsync();
 
